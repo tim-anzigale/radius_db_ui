@@ -1,4 +1,4 @@
-# RadiusDB Dashboard App
+# RadiusDB App
 
 This application provides a comprehensive dashboard for monitoring and managing subscriptions within the RadiusDB system. It offers real-time insights into user activity, connection status, and subscription plans.
 
