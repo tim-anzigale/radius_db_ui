@@ -1,16 +1,18 @@
-# radius_db_ui
+# RadiusDB Dashboard App
 
-A new Flutter project.
+This application provides a comprehensive dashboard for monitoring and managing subscriptions within the RadiusDB system. It offers real-time insights into user activity, connection status, and subscription plans.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Dashboard Overview**: Key metrics and performance indicators.
+- **Scrollable Subscription List**: Detailed list of subscriptions with sorting and filtering options.
+- **User Activity Over Time**: Analyze user engagement patterns and identify peak usage times.
+- **Top Plans Analysis**: Understand which subscription plans are most popular among users.
+- **Settings**: Customize notifications, privacy settings, account management, and more.
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies Used
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- [Flutter](https://flutter.dev/)
+- [Dart](https://dart.dev/)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
