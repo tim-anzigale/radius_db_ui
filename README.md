@@ -5,7 +5,7 @@ This application provides a comprehensive dashboard for monitoring and managing 
 ## Features
 
 - **Dashboard Overview**: Key metrics and performance indicators.
-- **Scrollable Subscription List**: Detailed list of subscriptions with sorting and filtering options.
+- **Subscriptions List**: Detailed list of subscriptions with sorting and filtering options.
 - **User Activity Over Time**: Analyze user engagement patterns and identify peak usage times.
 - **Top Plans Analysis**: Understand which subscription plans are most popular among users.
 - **Settings**: Customize notifications, privacy settings, account management, and more.
