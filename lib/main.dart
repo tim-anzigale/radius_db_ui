@@ -1,20 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:radius_db_ui/dashboard.dart';
+// lib/main.dart
 
+import 'package:flutter/material.dart';
+import 'user_list_view.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget{
-  //root
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'RadiusDB',
-      theme: ThemeData(primarySwatch: Colors.grey,
+      title: 'Radius App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-      home: Dashboard(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Radius'),
+        ),
+        body: UserListView(),
+      ),
     );
   }
 }
