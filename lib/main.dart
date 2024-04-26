@@ -1,7 +1,6 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'user_list_view.dart';
+import 'navigation_drawer.dart'; 
 
 void main() {
   runApp(MyApp());
@@ -19,6 +18,7 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text('Radius'),
         ),
+        drawer: SideMenu(), 
         body: UserListView(),
       ),
     );

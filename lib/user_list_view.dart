@@ -4,85 +4,66 @@ import 'user_data.dart';
 class UserListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<UserData>>(
+    return FutureBuilder<List<UserData>>( //asynchronous fetching of user data
       future: parseUserData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator()); // Loading indicator
+          return const Center(child: CircularProgressIndicator()); // Loading indicator
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}')); // Error handling
         } else {
           final userDataList = snapshot.data!;
-
-          return Container(
-            // Add margin around the Container
-            margin: EdgeInsets.all(10.0), // Add margin from all sides
-            // Apply decoration to the Container to achieve the rounded border
-            decoration: BoxDecoration(
-              color: Colors.white, // Background color of the Container
-              borderRadius: BorderRadius.circular(15.0), // Set rounded corners
-              border: Border.all(
-                color: Colors.grey, // Border color
-                width: 1.0, // Border width
-              ),
-            ),
-            child: Column(
-              children: [
-                // Header for the ListView
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Define the headers for each column
-                      Text(
-                        'Name',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'IP',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Plan',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Status',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // ListView.builder for displaying user data
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: userDataList.length,
-                    itemBuilder: (context, index) {
-                      final userData = userDataList[index];
-                      return ListTile(
-                        title: Text(userData.name),
-                        subtitle: Text('IP: ${userData.ip}\nPlan: ${userData.planName}'),
-                        trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text('Disconnected: ${userData.isDisconnected}'),
-                            Text('Terminated: ${userData.isTerminated}'),
+          return SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: DataTable(
+                      columns: const <DataColumn>[
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('IP')),
+                        DataColumn(label: Text('NAS')),
+                        DataColumn(label: Text('MAC')),
+                        DataColumn(label: Text('Plan')),
+                        DataColumn(label: Text('Status')),
+                      ],
+                      rows: userDataList.map((userData) {
+                        return DataRow(
+                          cells: <DataCell>[
+                            DataCell(Text(userData.name)),
+                            DataCell(Text(userData.ip)),
+                            DataCell(Text(userData.nas)),
+                            DataCell(Text(userData.macAdd)),
+                            DataCell(Text(userData.planName)),
+                            DataCell(
+                              Text(
+                                userData.isDisconnected
+                                    ? 'Disconnected'
+                                    : userData.isTerminated
+                                        ? 'Terminated'
+                                        : 'Connected',
+                                style: TextStyle(
+                                  color: userData.isDisconnected
+                                      ? Colors.red
+                                      : userData.isTerminated
+                                          ? Colors.orange
+                                          : Colors.green,
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                      );
-                    },
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
-              ],
+              ),
             ),
           );
         }
