@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'user_list_view.dart';
-import 'navigation_drawer.dart'; 
-
+import 'navigation_drawer.dart';
+import 'header.dart'; 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,10 +18,17 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Radius'),
+          title: const Text('Radius'),
         ),
-        drawer: SideMenu(), 
-        body: UserListView(),
+        drawer: const SideMenu(),
+        body: const Column(
+          children: [
+            Header(), 
+            Expanded(
+              child: UserListView(), 
+            ),
+          ],
+        ),
       ),
     );
   }
