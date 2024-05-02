@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'user_data.dart';
-import 'user_stats.dart';
+import 'components/user_stats.dart';
 
 class UserListView extends StatelessWidget {
   const UserListView({super.key});
@@ -15,18 +15,22 @@ class UserListView extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final userDataList = snapshot.data!;
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    UserStats(userDataList: userDataList),
-                    ResponsiveTable(userDataList: userDataList),
-                  ],
-                ),
-              );
-            },
+          final userDataList = snapshot.data!;
+          return SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  NeumorphicContainer(
+                    child: UserStats(userDataList: userDataList),
+                  ),
+                  const SizedBox(height: 10),
+                  NeumorphicContainer(
+                    child: ResponsiveTable(userDataList: userDataList),
+                  ),
+                ],
+              ),
+            ),
           );
         }
       },
@@ -34,99 +38,95 @@ class UserListView extends StatelessWidget {
   }
 }
 
-class ResponsiveTable extends StatelessWidget {
-  final List<UserData> userDataList;
+class NeumorphicContainer extends StatelessWidget {
+  final Widget child;
 
-  const ResponsiveTable({Key? key, required this.userDataList}) : super(key: key);
+  const NeumorphicContainer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: PaginatedDataTable(
-        header: const Text('Subscriptions'),
-        columns: const [
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('IP')),
-          DataColumn(label: Text('NAS')),
-          DataColumn(label: Text('MAC')),
-          DataColumn(label: Text('Plan')),
-          DataColumn(label: Text('Status')),
+    return Container(
+      padding: const EdgeInsets.all(0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade500,
+            offset: const Offset(4, 4),
+            blurRadius: 15,
+            spreadRadius: 1,
+          ),
+          const BoxShadow(
+            color: Colors.white,
+            offset: Offset(-4, -4),
+            blurRadius: 15,
+            spreadRadius: 1,
+          ),
         ],
-        source: UserDataDataSource(userDataList),
-        rowsPerPage: _rowsPerPage(context),
-        columnSpacing: _columnSpacing(context),
-        horizontalMargin: _horizontalMargin(context),
       ),
+      child: child,
     );
-  }
-
-  int _rowsPerPage(BuildContext context) {
-    if (MediaQuery.of(context).size.width > 800) {
-      return 20;
-    }
-    return 10;
-  }
-
-  double _columnSpacing(BuildContext context) {
-    if (MediaQuery.of(context).size.width > 800) {
-      return 50;
-    }
-    return 20;
-  }
-
-  double _horizontalMargin(BuildContext context) {
-    if (MediaQuery.of(context).size.width > 800) {
-      return 20;
-    }
-    return 10;
   }
 }
 
-class UserDataDataSource extends DataTableSource {
+
+
+
+// Assuming NeumorphicContainer is defined similarly as before
+
+class ResponsiveTable extends StatelessWidget {
   final List<UserData> userDataList;
 
-  UserDataDataSource(this.userDataList);
+  const ResponsiveTable({super.key, required this.userDataList});
+
+  @override
+  Widget build(BuildContext context) {
+    final userDataSource = UserDataSource(userDataList);
+    final screenWidth = MediaQuery.of(context).size.width;
+    int rowsPerPage = screenWidth > 800 ? 20 : 10;
+
+    return PaginatedDataTable(
+      header: const Text('Subscriptions', textAlign: TextAlign.left),
+      columns: const [
+        DataColumn(label: Text('Name', textAlign: TextAlign.center)),
+        DataColumn(label: Text('IP', textAlign: TextAlign.center)),
+        DataColumn(label: Text('NAS', textAlign: TextAlign.center)),
+        DataColumn(label: Text('MAC', textAlign: TextAlign.center)),
+        DataColumn(label: Text('Plan', textAlign: TextAlign.center)),
+        DataColumn(label: Text('Status', textAlign: TextAlign.center)),
+      ],
+      source: userDataSource,
+      rowsPerPage: rowsPerPage,
+      showFirstLastButtons: true,
+    );
+  }
+}
+
+class UserDataSource extends DataTableSource {
+  final List<UserData> userDataList;
+
+  UserDataSource(this.userDataList);
 
   @override
   DataRow? getRow(int index) {
-    if (index >= userDataList.length) {
-      return null;
-    }
+    if (index >= userDataList.length) return null;
     final userData = userDataList[index];
-    return DataRow(
-      cells: [
-        DataCell(Text(userData.name)),
-        DataCell(Text(userData.ip)),
-        DataCell(Text(userData.nas)),
-        DataCell(Text(userData.macAdd)),
-        DataCell(Text(userData.planName)),
-        DataCell(
-          Text(
-            userData.isDisconnected
-                ? 'Disconnected'
-                : userData.isTerminated
-                    ? 'Terminated'
-                    : 'Connected',
-            style: TextStyle(
-              color: userData.isDisconnected
-                  ? Colors.red
-                  : userData.isTerminated
-                      ? Colors.orange
-                      : Colors.green,
-            ),
-          ),
-        ),
-      ],
-    );
+    return DataRow(cells: [
+      DataCell(Text(userData.name)),
+      DataCell(Text(userData.ip)),
+      DataCell(Text(userData.nas)),
+      DataCell(Text(userData.macAdd)),
+      DataCell(Text(userData.planName)),
+      DataCell(Text(userData.isDisconnected ? 'Disconnected' : userData.isTerminated ? 'Terminated' : 'Connected',
+          style: TextStyle(color: userData.isDisconnected ? Colors.red : userData.isTerminated ? Colors.orange : Colors.green))),
+    ]);
   }
 
   @override
   bool get isRowCountApproximate => false;
-
   @override
   int get rowCount => userDataList.length;
-
   @override
   int get selectedRowCount => 0;
 }

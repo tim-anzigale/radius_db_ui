@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/services.dart' as rootBundle;
+
 import 'package:intl/intl.dart';
 
 class UserData {
@@ -60,12 +60,4 @@ class UserData {
     }
 }
 
-// Function to parse user data from JSON
-Future<List<UserData>> parseUserData() async {
-    // Load JSON data from assets
-    final jsonString = await rootBundle.rootBundle.loadString('assets/user_data.json');
-    final data = jsonDecode(jsonString) as List;
 
-    // Parse JSON data into a list of UserData objects
-    return data.map((json) => UserData.fromJson(json)).toList();
-}
