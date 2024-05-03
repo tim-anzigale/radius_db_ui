@@ -1,96 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-import '../user_data.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../user_data.dart'; // Import your UserData class
 
-class SubscriptionsChart extends StatelessWidget {
-    final List<UserData> userDataList;
+class SubscriptionsBarChart extends StatelessWidget {
+  final List<UserData> userDataList;
 
-    const SubscriptionsChart({super.key, required this.userDataList});
+  const SubscriptionsBarChart({super.key, required this.userDataList});
 
-    @override
-    Widget build(BuildContext context) {
-        // Group subscriptions by date and calculate connected and disconnected counts
-        final Map<DateTime, Map<String, int>> dateCounts = {};
+  @override
+  Widget build(BuildContext context) {
+    // Calculate the number of connected and disconnected subscriptions
+    int connectedSubscriptions = countConnected(userDataList);
+    int disconnectedSubscriptions = countDisconnected(userDataList);
 
-        for (var userData in userDataList) {
-            final subscriptionDate = DateTime(userData.createdAt.year, userData.createdAt.month, userData.createdAt.day);
-            if (!dateCounts.containsKey(subscriptionDate)) {
-                dateCounts[subscriptionDate] = {'connected': 0, 'disconnected': 0};
-            }
+    // Create a list of BarChartGroupData
+    List<BarChartGroupData> barChartGroups = [
+      createBarChartGroup(0, connectedSubscriptions.toDouble(), disconnectedSubscriptions.toDouble()),
+    ];
 
-            if (userData.isDisconnected) {
-                // Increment the disconnected count, ensuring it's not null
-                dateCounts[subscriptionDate]!['disconnected'] = (dateCounts[subscriptionDate]!['disconnected'] ?? 0) + 1;
-            } else {
-                // Increment the connected count, ensuring it's not null
-                dateCounts[subscriptionDate]!['connected'] = (dateCounts[subscriptionDate]!['connected'] ?? 0) + 1;
-            }
-        }
-
-        // Convert the dateCounts map to a list of maps for the chart data
-        final data = dateCounts.entries.map((entry) {
-            return {
-                'date': entry.key, // The date (domain)
-                'connected': entry.value['connected'], // The connected count (measure)
-                'disconnected': entry.value['disconnected'], // The disconnected count (measure)
-            };
-        }).toList();
-
-        // Define the series for the chart
-        final series = [
-            charts.Series<Map<String, dynamic>, DateTime>(
-                id: 'Connected',
-                colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-                domainFn: (entry, _) => entry['date'] as DateTime,
-                measureFn: (entry, _) => entry['connected'] as int,
-                data: data,
+    return BarChart(
+      BarChartData(
+        barGroups: barChartGroups,
+        titlesData: FlTitlesData(
+          show: true,
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: true, interval: 5),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: bottomTitles,
             ),
-            charts.Series<Map<String, dynamic>, DateTime>(
-                id: 'Disconnected',
-                colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-                domainFn: (entry, _) => entry['date'] as DateTime,
-                measureFn: (entry, _) => entry['disconnected'] as int,
-                data: data,
-            ),
-        ];
+          ),
+        ),
+        barTouchData: BarTouchData(enabled: false),
+        borderData: FlBorderData(show: false),
+        gridData: const FlGridData(show: false),
+      ),
+    );
+  }
 
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                const Text(
-                    'Subscriptions Over Time',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                    ),
-                ),
-                const SizedBox(height: 10),
-                // Display the bar chart
-                SizedBox(
-                    height: 300, // Specify the height of the chart
-                    child: charts.TimeSeriesChart(
-                        series,
-                        animate: true,
-                        behaviors: [
-                            charts.ChartTitle(
-                                'Date',
-                                behaviorPosition: charts.BehaviorPosition.bottom,
-                                titleOutsideJustification: charts.OutsideJustification.middleDrawArea,
-                            ),
-                            charts.ChartTitle(
-                                'Subscriptions',
-                                behaviorPosition: charts.BehaviorPosition.start,
-                                titleOutsideJustification: charts.OutsideJustification.middleDrawArea,
-                                titleStyleSpec: charts.TextStyleSpec(fontSize: 14, color: charts.Color.white),
-                                titlePadding: 5,
-                            ),
-                        ],
-                        defaultRenderer: charts.BarRendererConfig<DateTime>(),
-                        domainAxis: const charts.DateTimeAxisSpec(),
-                        primaryMeasureAxis: const charts.NumericAxisSpec(),
-                    ),
-                ),
-            ],
-        );
-    }
+  // Calculate the number of connected subscriptions
+  int countConnected(List<UserData> users) {
+    return users.where((user) => !user.isDisconnected).length;
+  }
+
+  // Calculate the number of disconnected subscriptions
+  int countDisconnected(List<UserData> users) {
+    return users.where((user) => user.isDisconnected).length;
+  }
+
+  // Create BarChartGroupData for connected and disconnected subscriptions
+  BarChartGroupData createBarChartGroup(int x, double y1, double y2) {
+    return BarChartGroupData(
+      x: x,
+      barsSpace: 4,
+      barRods: [
+        BarChartRodData(toY: y1, color: Colors.green, width: 10),
+        BarChartRodData(toY: y2, color: Colors.red, width: 10),
+      ],
+    );
+  }
+
+  // Widget to display bottom titles for the chart
+  Widget bottomTitles(double value, TitleMeta meta) {
+    final List<String> labels = ['Connected', 'Disconnected'];
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      child: Text(
+        labels[value.toInt()],
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
 }

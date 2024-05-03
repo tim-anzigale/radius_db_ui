@@ -16,10 +16,10 @@ Future<List<UserData>> parseUserData() async {
         List<UserData> userDataList = data.map((json) => UserData.fromJson(json)).toList();
         
         // Debug print statements to check the parsed data
-        print('Parsed ${userDataList.length} users from JSON data.');
-        for (var user in userDataList) {
-            print('User: ${user.name}, IP: ${user.ip}, Plan: ${user.planName}');
-        }
+        //print('Parsed ${userDataList.length} users from JSON data.');
+       // for (var user in userDataList) {
+      //     print('User: ${user.name}, IP: ${user.ip}, Plan: ${user.planName}');
+       // }
 
         return userDataList;
     } catch (e) {

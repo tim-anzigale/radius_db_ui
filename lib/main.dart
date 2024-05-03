@@ -18,7 +18,10 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
             title: 'Radius App',
             theme: ThemeData(
-                primarySwatch: Colors.blueGrey,
+                
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey.shade200),
+        useMaterial3: true,
+      
             ),
             initialRoute: '/home', // Initial route is the home screen
             routes: {

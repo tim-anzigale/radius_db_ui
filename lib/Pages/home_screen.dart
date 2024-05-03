@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
             appBar: AppBar(
                 title: const Text('Home'),
             ),
-            body: Padding(
+            body: SingleChildScrollView( // Make the home screen scrollable
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                     children: [
@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
                                         blurRadius: 8,
                                         spreadRadius: 1,
                                     ),
-                                    BoxShadow(
+                                    const BoxShadow(
                                         color: Colors.white,
                                         offset: Offset(-4, -4),
                                         blurRadius: 8,
@@ -44,65 +44,64 @@ class HomeScreen extends StatelessWidget {
                                 ],
                             ),
                             child: RecentSubscriptionsView(userDataList: userDataList),
+                            width: double.infinity, // Ensure the view occupies full width
                         ),
-                        // Lower portion: Two views side by side
-                        Expanded(
-                            child: Row(
-                                children: [
-                                    // Left side: Top Plans
-                                    Expanded(
-                                        child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            margin: const EdgeInsets.only(right: 8.0),
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius: BorderRadius.circular(15),
-                                                boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors.grey.shade400,
-                                                        offset: Offset(4, 4),
-                                                        blurRadius: 8,
-                                                        spreadRadius: 1,
-                                                    ),
-                                                    BoxShadow(
-                                                        color: Colors.white,
-                                                        offset: Offset(-4, -4),
-                                                        blurRadius: 8,
-                                                        spreadRadius: 1,
-                                                    ),
-                                                ],
+                        // Create a GridView for Top Plans and Subscriptions Chart
+                        GridView.count(
+                            shrinkWrap: true,
+                            crossAxisCount: MediaQuery.of(context).size.width >= 800 ? 2 : 1, // 2 columns on larger screens, 1 on smaller screens
+                            childAspectRatio: 1.0, // Adjust the aspect ratio of each grid item
+                            physics: const NeverScrollableScrollPhysics(), // Prevent scrolling inside the grid view
+                            mainAxisSpacing: 16.0, // Vertical spacing between grid items
+                            crossAxisSpacing: 16.0, // Horizontal spacing between grid items
+                            children: [
+                                // Top Plans View
+                                Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.grey.shade400,
+                                                offset: Offset(4, 4),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
                                             ),
-                                            child: TopPlansView(userDataList: userDataList),
-                                        ),
-                                    ),
-                                    // Right side: Subscriptions Chart
-                                    Expanded(
-                                        child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            margin: const EdgeInsets.only(left: 8.0),
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius: BorderRadius.circular(15),
-                                                boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors.grey.shade400,
-                                                        offset: Offset(4, 4),
-                                                        blurRadius: 8,
-                                                        spreadRadius: 1,
-                                                    ),
-                                                    BoxShadow(
-                                                        color: Colors.white,
-                                                        offset: Offset(-4, -4),
-                                                        blurRadius: 8,
-                                                        spreadRadius: 1,
-                                                    ),
-                                                ],
+                                            const BoxShadow(
+                                                color: Colors.white,
+                                                offset: Offset(-4, -4),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
                                             ),
-                                            child: SubscriptionsChart(userDataList: userDataList),
-                                        ),
+                                        ],
                                     ),
-                                ],
-                            ),
+                                    child: TopPlansView(userDataList: userDataList),
+                                ),
+                                // Subscriptions Chart View
+                                Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.grey.shade400,
+                                                offset: Offset(4, 4),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
+                                            ),
+                                            const BoxShadow(
+                                                color: Colors.white,
+                                                offset: Offset(-4, -4),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
+                                            ),
+                                        ],
+                                    ),
+                                    child: SubscriptionsBarChart(userDataList: userDataList),
+                                ),
+                            ],
                         ),
                     ],
                 ),
