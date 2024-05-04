@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../user_data.dart'; // Import your UserData class
+import '../user_data.dart'; 
 
 class SubscriptionsBarChart extends StatelessWidget {
   final List<UserData> userDataList;

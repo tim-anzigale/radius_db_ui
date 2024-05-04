@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../user_data.dart';
-import '../data/data_service.dart'; // Import your data service where parseUserData() is defined
+import '../data/data_service.dart'; 
 
 class UserStats extends StatefulWidget {
   const UserStats({super.key, required List<UserData> userDataList});
 
   @override
+  // ignore: library_private_types_in_public_api
   _UserStatsState createState() => _UserStatsState();
 }
 
@@ -28,7 +29,7 @@ class _UserStatsState extends State<UserStats> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return Center(child: Text('No data available'));
+          return const Center(child: Text('No data available'));
         } else {
           List<UserData> userDataList = snapshot.data!;
           return _buildStatsGrid(userDataList, context);
@@ -38,7 +39,7 @@ class _UserStatsState extends State<UserStats> {
   }
 
   Widget _buildStatsGrid(List<UserData> userDataList, BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    Theme.of(context);
 
     // Calculate statistics
     final int totalSubscriptions = userDataList.length;
@@ -98,63 +99,104 @@ class _UserStatsState extends State<UserStats> {
 }
 
 
-  Widget _buildStatsCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade400,
-            offset: const Offset(4, 4),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-          const BoxShadow(
-            color: Colors.white,
-            offset: Offset(-4, -4),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center, // Center the text vertically
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.headline6?.copyWith(color: color),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+ Widget _buildStatsCard({
+  required IconData icon,
+  required String title,
+  required String value,
+  required Color color,
+  required BuildContext context,
+}) {
+  // Set initial sizes
+  double fontSize = 16.0; // Initial text size
+  double iconSize = 24.0; // Initial icon size
+
+  // Calculate available width for the text and icon
+  final availableWidth = MediaQuery.of(context).size.width - (2 * 16); // Account for padding
+
+  // Measure the width required for the title and value texts
+  final titleTextSpan = TextSpan(text: title, style: TextStyle(fontSize: fontSize));
+  final valueTextSpan = TextSpan(text: value, style: TextStyle(fontSize: fontSize));
+  
+  final titleTextPainter = TextPainter(text: titleTextSpan, textDirection: TextDirection.ltr);
+  final valueTextPainter = TextPainter(text: valueTextSpan, textDirection: TextDirection.ltr);
+  
+  titleTextPainter.layout();
+  valueTextPainter.layout();
+  
+  // Calculate total width needed for the texts and icon
+  final requiredWidth = titleTextPainter.width + valueTextPainter.width + iconSize + 12.0;
+
+  // If there is overflow, adjust the sizes
+  if (requiredWidth > availableWidth) {
+    // Calculate a scaling factor to fit the content
+    final scaleFactor = availableWidth / requiredWidth;
+
+    // Adjust font and icon sizes based on the scaling factor
+    fontSize = (fontSize * scaleFactor).clamp(12.0, 16.0); // Limit font size to a range
+    iconSize = (iconSize * scaleFactor).clamp(18.0, 24.0); // Limit icon size to a range
   }
+
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    margin: const EdgeInsets.all(8.0),
+    decoration: BoxDecoration(
+      color: Colors.grey[200],
+      borderRadius: BorderRadius.circular(15),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.shade400,
+          offset: const Offset(4, 4),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+        const BoxShadow(
+          color: Colors.white,
+          offset: Offset(-4, -4),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        // Icon container
+        Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: iconSize),
+        ),
+        const SizedBox(width: 12),
+        // Expanded child
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.subtitle1?.color,
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Value
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}

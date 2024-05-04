@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' as rootBundle;
-import 'package:intl/intl.dart';
 import '../user_data.dart'; // Import UserData class (update path as needed)
 
 // Function to parse user data from JSON

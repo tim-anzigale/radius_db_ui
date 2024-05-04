@@ -8,12 +8,12 @@ import '../components/header.dart';
 class SubscriptionsPage extends StatelessWidget {
   final List<UserData> userDataList;
 
-  const SubscriptionsPage({Key? key, required this.userDataList}) : super(key: key);
+  const SubscriptionsPage({super.key, required this.userDataList});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: SideMenu(), // Assuming NavigationDrawer is the correct widget
+      drawer: const SideMenu(), // Assuming NavigationDrawer is the correct widget
       appBar: AppBar(
         title: const Text('Subscriptions'),
       ),

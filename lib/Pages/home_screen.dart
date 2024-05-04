@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../user_data.dart'; // Import your user data class
-import '../components/recent_subscriptions_view.dart'; // Import the recent subscriptions view
-import '../components/top_plans_view.dart'; // Import the top plans view
-import '../components/subscriptions_chart.dart'; // Import the subscriptions chart view
+import '../user_data.dart'; 
+import '../components/recent_subscriptions_view.dart'; 
+import '../components/top_plans_view.dart'; 
+import '../components/subscriptions_chart.dart'; 
 import '../navigation_drawer.dart';
 import '../components/header.dart';
 
@@ -56,11 +56,11 @@ class HomeScreen extends StatelessWidget {
 
     Widget neumorphicContainer({required Widget child, required BuildContext context}) {
         return Container(
-            padding: const EdgeInsets.all(16.0), // Increased padding inside the container
-            margin: const EdgeInsets.symmetric(vertical: 10), // Margin for top/bottom for more space
+            padding: const EdgeInsets.all(16.0), 
+            margin: const EdgeInsets.symmetric(vertical: 10), 
             decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(20), // Slightly increased border radius
+                borderRadius: BorderRadius.circular(20), 
                 boxShadow: [
                     BoxShadow(
                         color: Colors.grey.shade500,
