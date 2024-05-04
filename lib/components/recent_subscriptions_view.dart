@@ -51,6 +51,7 @@ class RecentSubscriptionsView extends StatefulWidget {
     const RecentSubscriptionsView({super.key, required this.userDataList});
 
     @override
+    // ignore: library_private_types_in_public_api
     _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
 }
 
@@ -68,7 +69,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     // Function to filter users based on connection date/created date
     List<UserData> filterRecentUsers(List<UserData> users) {
         final currentDate = DateTime.now();
-        final cutoffDate = currentDate.subtract(Duration(days: 30));
+        final cutoffDate = currentDate.subtract(const Duration(days: 30));
 
         // Filter users based on the condition (createdAt within the last 30 days)
         return users.where((user) {
@@ -99,9 +100,10 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                     _dataSource = UserDataDataSource(filteredUsers);
 
                     // Display the data table within a container that fills the available width
-                    return Container(
+                    return SizedBox(
                         width: double.infinity,
                         child: PaginatedDataTable(
+                            header: const Text('Recent Subscriptions'),
                             columns: const [
                                 DataColumn(label: Text('Name')),
                                 DataColumn(label: Text('IP')),

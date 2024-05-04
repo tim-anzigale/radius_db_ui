@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import './Pages/settings.dart'; // Import your settings page
 
 class SideMenu extends StatelessWidget {
-  const SideMenu({super.key});
+  const SideMenu({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,34 +45,35 @@ class SideMenu extends StatelessWidget {
             ),
           ),
           // Dashboard (Home) option
-                    _buildNeumorphicTile(
-                        icon: Icons.home,
-                        text: 'Dashboard',
-                        onTap: () {
-                            Navigator.pop(context); // Close the drawer
-                            // Navigate to the home screen
-                            Navigator.pushReplacementNamed(context, '/home');
-                        },
-                    ),
-                    // Subscriptions option
-                    _buildNeumorphicTile(
-                        icon: Icons.person,
-                        text: 'Subscriptions',
-                        onTap: () {
-                            Navigator.pop(context); // Close the drawer
-                            // Navigate to the subscriptions page
-                            Navigator.pushReplacementNamed(context, '/subscriptions');
-                        },
-                    ),
-                    // Settings option (you can add your own functionality here)
-                    _buildNeumorphicTile(
-                        icon: Icons.settings,
-                        text: 'Settings',
-                        onTap: () {
-                            Navigator.pop(context); // Close the drawer
-                            // Add navigation logic for Settings
-                        },
-                    ),
+          _buildNeumorphicTile(
+            icon: Icons.home,
+            text: 'Dashboard',
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              // Navigate to the home screen
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+          ),
+          // Subscriptions option
+          _buildNeumorphicTile(
+            icon: Icons.person,
+            text: 'Subscriptions',
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              // Navigate to the subscriptions page
+              Navigator.pushReplacementNamed(context, '/subscriptions');
+            },
+          ),
+          // Settings option
+          _buildNeumorphicTile(
+            icon: Icons.settings,
+            text: 'Settings',
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              // Navigate to the settings page
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+            },
+          ),
         ],
       ),
     );

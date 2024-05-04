@@ -81,9 +81,10 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                     _dataSource = UserDataDataSource(users);
 
                     // Display the paginated data table within a container that fills the available width
-                    return Container(
+                    return SizedBox(
                         width: double.infinity,
                         child: PaginatedDataTable(
+                            header: const Text('All Subscriptions'),
                             columns: const [
                                 DataColumn(label: Text('Name')),
                                 DataColumn(label: Text('IP')),

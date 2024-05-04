@@ -1,6 +1,7 @@
 // data_service.dart
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' as rootBundle;
 import 'package:intl/intl.dart';
 import '../user_data.dart'; // Import UserData class (update path as needed)
@@ -24,7 +25,9 @@ Future<List<UserData>> parseUserData() async {
         return userDataList;
     } catch (e) {
         // Handle errors during JSON parsing
-        print('Error parsing JSON data: $e');
+        if (kDebugMode) {
+          print('Error parsing JSON data: $e');
+        }
         return []; // Return an empty list in case of error
     }
 }
