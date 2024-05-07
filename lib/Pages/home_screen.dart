@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../user_data.dart'; 
-import '../components/recent_subscriptions_view.dart'; 
-import '../components/top_plans_view.dart'; 
-import '../components/subscriptions_chart.dart'; 
-import '../navigation_drawer.dart';
 import '../components/header.dart';
+import '../components/recent_subscriptions_view.dart';
+import '../components/top_plans_view.dart';
+import '../components/subscriptions_chart.dart';
+import '../navigation_drawer.dart';
+import '../user_data.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class HomeScreen extends StatelessWidget {
     final List<UserData> userDataList;
@@ -19,68 +20,70 @@ class HomeScreen extends StatelessWidget {
                 title: const Text('Home'),
             ),
             body: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0), // Increased padding around the content
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                     children: [
-                      CustomHeader(),
-                        SizedBox(height: 5), // Top spacing
-                        neumorphicContainer(
-                            child: RecentSubscriptionsView(userDataList: userDataList),
-                            context: context
-                        ),
-                        SizedBox(height: 5), // Spacing between elements
-                        GridView.count(
-                            shrinkWrap: true,
-                            crossAxisCount: MediaQuery.of(context).size.width >= 800 ? 2 : 1,
-                            childAspectRatio: 1.0,
-                            physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 10.0, // Increased vertical spacing between grid items
-                            crossAxisSpacing: 16.0, // Increased horizontal spacing between grid items
-                            children: [
-                                neumorphicContainer(
-                                    child: TopPlansView(userDataList: userDataList),
-                                    context: context
-                                ),
-                                neumorphicContainer(
-                                    child: SubscriptionsBarChart(userDataList: userDataList),
-                                    context: context
-                                ),
-                            ],
-                        ),
-                        SizedBox(height: 5), // Bottom spacing
+                        _buildHeader(context),
+                        const SizedBox(height: 5),
+                        _buildRecentSubscriptionsSection(context),
+                        const SizedBox(height: 10),
+                        _buildGridSection(context),
                     ],
                 ),
             ),
         );
     }
 
-    Widget neumorphicContainer({required Widget child, required BuildContext context}) {
-        return Container(
-            padding: const EdgeInsets.all(16.0), 
-            margin: const EdgeInsets.symmetric(vertical: 10), 
-            decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(20), 
-                boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.shade500,
-                        offset: Offset(6, 6),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                    ),
-                    const BoxShadow(
-                        color: Colors.white,
-                        offset: Offset(-6, -6),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                    ),
-                ],
-            ),
-            child: InkWell(
-                onTap: () {}, // Add your tap handler here
-                child: child,
-            ),
-            width: double.infinity,
+    // Helper function to build the header section
+    Widget _buildHeader(BuildContext context) {
+        return const CustomHeader();
+    }
+
+    // Helper function to build the recent subscriptions section
+    Widget _buildRecentSubscriptionsSection(BuildContext context) {
+    return RecentSubscriptionsView(userDataList: userDataList);
+}
+    // Helper function to build the grid section
+    Widget _buildGridSection(BuildContext context) {
+        final bool isWideScreen = MediaQuery.of(context).size.width >= 800;
+        final int crossAxisCount = isWideScreen ? 2 : 1;
+        
+        return GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 1.0,
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 16.0,
+            children: [
+                neumorphicContainer(
+                    child: TopPlansView(userDataList: userDataList),
+                    context: context,
+                ),
+                neumorphicContainer(
+                    child: SubscriptionsBarChart(userDataList: userDataList),
+                    context: context,
+                ),
+            ],
         );
     }
+}
+
+Widget neumorphicContainer({required Widget child, required BuildContext context}) {
+    return Neumorphic(
+        style: NeumorphicStyle(
+            color: Colors.grey[200],
+            depth: 4, // Adjust depth as desired
+            intensity: 0.8, // Adjust intensity as desired
+            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)), // Rounded corners
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+            width: double.infinity, // Fill the available width
+            child: InkWell(
+                onTap: () {}, // Add your tap handler here if needed
+                child: child,
+            ),
+        ),
+    );
 }

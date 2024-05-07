@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/header.dart';
 import '../data/data_service.dart'; 
 import '../user_data.dart'; 
+
 
 class UserDataDataSource extends DataTableSource {
     final List<UserData> userDataList;
@@ -81,21 +83,21 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                     _dataSource = UserDataDataSource(users);
 
                     // Display the paginated data table within a container that fills the available width
-                    return SizedBox(
-                        width: double.infinity,
-                        child: PaginatedDataTable(
-                            header: const Text('All Subscriptions'),
-                            columns: const [
-                                DataColumn(label: Text('Name')),
-                                DataColumn(label: Text('IP')),
-                                DataColumn(label: Text('MAC')),
-                                DataColumn(label: Text('Plan')),
-                                DataColumn(label: Text('Status')),
-                            ],
-                            source: _dataSource,
-                            rowsPerPage: 10, // Adjust as needed
-                        ),
-                    );
+                   return SizedBox(
+    width: double.infinity,
+    child: PaginatedDataTable(
+        columns: const [
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('IP')),
+            DataColumn(label: Text('MAC')),
+            DataColumn(label: Text('Plan')),
+            DataColumn(label: Text('Status')),
+        ],
+        source: _dataSource,
+        rowsPerPage: 10, // Adjust as needed
+    ),
+);
+
                 }
             },
         );

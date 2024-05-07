@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import '../data/data_service.dart'; 
-import '../user_data.dart'; 
+import '../data/data_service.dart';
+import '../user_data.dart';
 
+// Data source class for managing data in PaginatedDataTable
 class UserDataDataSource extends DataTableSource {
     final List<UserData> userDataList;
 
-    // Constructor accepting userDataList
     UserDataDataSource(this.userDataList);
 
     @override
-    int get rowCount => userDataList.length; // Returns the length of the list
+    int get rowCount => userDataList.length;
 
     @override
     DataRow? getRow(int index) {
-        // Check index bounds
         if (index >= userDataList.length) {
             return null;
         }
         final user = userDataList[index];
 
-        // Return a DataRow for the user
         return DataRow(
             cells: [
                 DataCell(Text(user.name)),
@@ -45,16 +43,17 @@ class UserDataDataSource extends DataTableSource {
     int get selectedRowCount => 0;
 }
 
+// RecentSubscriptionsView class
 class RecentSubscriptionsView extends StatefulWidget {
     final List<UserData> userDataList;
 
     const RecentSubscriptionsView({super.key, required this.userDataList});
 
     @override
-    // ignore: library_private_types_in_public_api
     _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
 }
 
+// State class for RecentSubscriptionsView
 class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     late Future<List<UserData>> _futureUserData;
     late UserDataDataSource _dataSource;
@@ -62,20 +61,19 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     @override
     void initState() {
         super.initState();
-        // Call parseUserData() to load and parse data
+        // Fetch data asynchronously
         _futureUserData = parseUserData();
     }
 
-    // Function to filter users based on connection date/created date
+    // Filter recent users based on connection date
     List<UserData> filterRecentUsers(List<UserData> users) {
         final currentDate = DateTime.now();
         final cutoffDate = currentDate.subtract(const Duration(days: 30));
 
-        // Filter users based on the condition (createdAt within the last 30 days)
         return users.where((user) {
-            final connectionDate = user.createdAt; // Use createdAt or lastConnectionTime
+            final connectionDate = user.createdAt;
             return connectionDate.isAfter(cutoffDate) && connectionDate.isBefore(currentDate);
-        }).take(15).toList(); // Take the first 15 filtered users
+        }).take(15).toList(); // Return the first 15 filtered users
     }
 
     @override
@@ -84,26 +82,19 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
             future: _futureUserData,
             builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Display loading indicator while waiting for data
                     return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                    // Display error message if an error occurs
                     return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                    // Data is loaded successfully
-                    final users = snapshot.data!;
+                } else if (snapshot.hasData) {
+                    // Filter the user data based on recent connection date
+                    final filteredUsers = filterRecentUsers(snapshot.data!);
                     
-                    // Filter the users based on connection date/created date
-                    final filteredUsers = filterRecentUsers(users);
-
                     // Create a data source for the data table
                     _dataSource = UserDataDataSource(filteredUsers);
 
-                    // Display the data table within a container that fills the available width
                     return SizedBox(
                         width: double.infinity,
                         child: PaginatedDataTable(
-                            header: const Text('Recent Subscriptions'),
                             columns: const [
                                 DataColumn(label: Text('Name')),
                                 DataColumn(label: Text('IP')),
@@ -112,10 +103,11 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                                 DataColumn(label: Text('Status')),
                             ],
                             source: _dataSource,
-                            rowsPerPage: 10, // Adjust as needed
+                            rowsPerPage: 10, // You can adjust this as needed
                         ),
                     );
                 }
+                return const Center(child: CircularProgressIndicator());
             },
         );
     }
