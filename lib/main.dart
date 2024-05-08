@@ -8,7 +8,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.blue,
           backgroundColor: Colors.grey.shade200,
-        
         ),
         scaffoldBackgroundColor: Colors.grey.shade200,
         appBarTheme: AppBarTheme(
@@ -29,16 +28,32 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.grey[800],
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.grey[800]),
+          titleTextStyle: TextStyle(
+            color: Colors.grey[800],
+            fontWeight: FontWeight.bold,
+            fontSize: 18, // Adjust size if necessary
+          ),
         ),
         drawerTheme: DrawerThemeData(
           backgroundColor: Colors.grey.shade200,
         ),
+        dataTableTheme: DataTableThemeData(
+          headingRowColor: MaterialStateProperty.all(Colors.grey.shade200),
+          dataRowColor: MaterialStateProperty.all(Colors.grey.shade100),
+          headingTextStyle: TextStyle(
+            color: Colors.grey[800],
+            fontWeight: FontWeight.bold,
+          ),
+          dataTextStyle: TextStyle(
+            color: Colors.grey[800],
+          ),
+          dividerThickness: 1.5, // Adjust as necessary
+        ),
       ),
-      initialRoute: '/home', // Initial route is the home screen
+      initialRoute: '/home',
       routes: {
-        '/home': (context) => HomeScreen(userDataList: userDataList), // Define HomeScreen route with userDataList argument
-        '/subscriptions': (context) => SubscriptionsPage(userDataList: userDataList), // Define SubscriptionsPage route with userDataList argument
-        
+        '/home': (context) => HomeScreen(userDataList: userDataList),
+        '/subscriptions': (context) => SubscriptionsPage(userDataList: userDataList),
       },
     );
   }

@@ -23,9 +23,11 @@ class SubscriptionsPage extends StatelessWidget {
         child: Column(
           children: [
             const CustomHeader(),
-            // Remove the container wrapping UserStats
-            // Directly add UserStats widget
+            // UserStats widget
             UserStats(userDataList: userDataList),
+
+            // Add spacing between UserStats and SubscriptionsView
+            SizedBox(height: 16), // Adjust the height to your preference
 
             // All subscriptions view with its own container and styling
             Container(
