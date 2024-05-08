@@ -3,14 +3,12 @@ import '../user_data.dart';
 import '../data/data_service.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
-
 class UserStats extends StatefulWidget {
   const UserStats({super.key, required this.userDataList});
 
   final List<UserData> userDataList;
 
   @override
-  // ignore: library_private_types_in_public_api
   _UserStatsState createState() => _UserStatsState();
 }
 
@@ -44,7 +42,6 @@ class _UserStatsState extends State<UserStats> {
     );
   }
 }
-
 
 class UserStatsCardGridView extends StatelessWidget {
   const UserStatsCardGridView({super.key, required this.userDataList});
@@ -82,28 +79,32 @@ class UserStatsCardGridView extends StatelessWidget {
               icon: Icons.people,
               title: 'Total Subscriptions',
               value: totalSubscriptions.toString(),
-              color: Colors.green, // Color of icon and value
+              color: Colors.green,
+              trend: 5, // Positive trend
             );
           case 1:
             return UserStatsCard(
               icon: Icons.add,
               title: 'Recent Subscriptions',
               value: recentSubscriptions.toString(),
-              color: Colors.green, // Color of icon and value
+              color: Colors.green,
+              trend: -3, // Negative trend
             );
           case 2:
             return UserStatsCard(
               icon: Icons.people,
               title: 'Active Subscriptions',
               value: activeSubscriptions.toString(),
-              color: Colors.green, // Color of icon and value
+              color: Colors.green,
+              trend: 2, // Positive trend
             );
           case 3:
             return UserStatsCard(
               icon: Icons.remove,
               title: 'Terminated Subscriptions',
               value: terminatedSubscriptions.toString(),
-              color: Colors.red, // Color of icon and value
+              color: Colors.red,
+              trend: -1, // Negative trend
             );
           default:
             return Container(); // This should not happen
@@ -113,7 +114,6 @@ class UserStatsCardGridView extends StatelessWidget {
   }
 }
 
-
 class UserStatsCard extends StatelessWidget {
   const UserStatsCard({
     super.key,
@@ -121,12 +121,14 @@ class UserStatsCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.color,
+    required this.trend,
   });
 
   final IconData icon;
   final String title;
   final String value;
   final Color color;
+  final int trend;
 
   @override
   Widget build(BuildContext context) {
@@ -153,16 +155,21 @@ class UserStatsCard extends StatelessWidget {
                   color: color, // Only value colored
                 ),
               ),
-              NeumorphicIcon(
-                icon,
-                size: 24,
-                style: NeumorphicStyle(
-                  color: color, // Only icon colored
-                  depth: 4,
-                  intensity: 0.8,
-                  shape: NeumorphicShape.convex,
-                  boxShape: const NeumorphicBoxShape.circle(),
-                ),
+              Column(
+                children: [
+                  NeumorphicIcon(
+                    icon,
+                    size: 30,
+                    style: NeumorphicStyle(
+                      color: color, // Only icon colored
+                      depth: 4,
+                      intensity: 0.8,
+                      shape: NeumorphicShape.convex,
+                      boxShape: const NeumorphicBoxShape.circle(),
+                    ),
+                  ),
+                  _buildTrendArrow(trend),
+                ],
               ),
             ],
           ),
@@ -177,6 +184,35 @@ class UserStatsCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Helper function to build trend arrows
+  Widget _buildTrendArrow(int trend) {
+    if (trend == 0) {
+      return const SizedBox.shrink(); // No trend change
+    }
+
+    final IconData arrowIcon = trend > 0 ? Icons.arrow_upward : Icons.arrow_downward;
+    final Color arrowColor = trend > 0 ? Colors.green : Colors.red;
+
+    return Row(
+      children: [
+        Icon(
+          arrowIcon,
+          size: 20,
+          color: arrowColor,
+        ),
+        const SizedBox(width: 2),
+        Text(
+          '${trend.abs()}%',
+          style: TextStyle(
+            fontSize: 14,
+            color: arrowColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
