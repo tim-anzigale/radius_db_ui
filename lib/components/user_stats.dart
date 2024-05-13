@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/components/user_stats_gridview.dart';
 import '../user_data.dart';
 import '../data/data_service.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -43,77 +44,6 @@ class _UserStatsState extends State<UserStats> {
   }
 }
 
-class UserStatsCardGridView extends StatelessWidget {
-  const UserStatsCardGridView({super.key, required this.userDataList});
-
-  final List<UserData> userDataList;
-
-  @override
-  Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final int crossAxisCount = screenWidth < 650 ? 2 : (screenWidth < 800 ? 3 : 4);
-    final double childAspectRatio = screenWidth < 650 ? 1.5 : 1.2;
-
-    final totalSubscriptions = userDataList.length;
-    final recentSubscriptions = userDataList.where((user) {
-      final currentDate = DateTime.now();
-      return currentDate.difference(user.createdAt).inDays <= 30;
-    }).length;
-    final activeSubscriptions = userDataList.where((user) => !user.isTerminated).length;
-    final terminatedSubscriptions = userDataList.where((user) => user.isTerminated).length;
-
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: 4,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 16.0,
-        mainAxisSpacing: 16.0,
-        childAspectRatio: childAspectRatio,
-      ),
-      itemBuilder: (context, index) {
-        switch (index) {
-          case 0:
-            return UserStatsCard(
-              icon: Icons.people,
-              title: 'Total Subscriptions',
-              value: totalSubscriptions.toString(),
-              color: Colors.green,
-              trend: 5, // Positive trend
-            );
-          case 1:
-            return UserStatsCard(
-              icon: Icons.add,
-              title: 'Recent Subscriptions',
-              value: recentSubscriptions.toString(),
-              color: Colors.green,
-              trend: -3, // Negative trend
-            );
-          case 2:
-            return UserStatsCard(
-              icon: Icons.people,
-              title: 'Active Subscriptions',
-              value: activeSubscriptions.toString(),
-              color: Colors.green,
-              trend: 2, // Positive trend
-            );
-          case 3:
-            return UserStatsCard(
-              icon: Icons.remove,
-              title: 'Terminated Subscriptions',
-              value: terminatedSubscriptions.toString(),
-              color: Colors.red,
-              trend: -1, // Negative trend
-            );
-          default:
-            return Container(); // This should not happen
-        }
-      },
-    );
-  }
-}
-
 class UserStatsCard extends StatelessWidget {
   const UserStatsCard({
     super.key,
@@ -132,11 +62,18 @@ class UserStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive size adjustments
+    double iconSize = MediaQuery.of(context).size.width < 600 ? 24 : 30;
+    double valueFontSize = MediaQuery.of(context).size.width < 600 ? 24 : 30;
+    double titleFontSize = MediaQuery.of(context).size.width < 600 ? 10 : 12;
+    double arrowSize = MediaQuery.of(context).size.width < 600 ? 16 : 20;
+    double percentageFontSize = MediaQuery.of(context).size.width < 600 ? 12 : 14;
+
     return Neumorphic(
       style: NeumorphicStyle(
-        color: Colors.grey[200], // Base color for the card
-        depth: 4, // Adjust the depth as desired
-        intensity: 0.8, // Adjust the intensity as desired
+        color: Colors.grey[200],
+        depth: 4,
+        intensity: 0.8,
         boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
       ),
       padding: const EdgeInsets.all(16.0),
@@ -144,42 +81,44 @@ class UserStatsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: color, // Only value colored
-                ),
-              ),
-              Column(
-                children: [
-                  NeumorphicIcon(
-                    icon,
-                    size: 30,
-                    style: NeumorphicStyle(
-                      color: color, // Only icon colored
-                      depth: 4,
-                      intensity: 0.8,
-                      shape: NeumorphicShape.convex,
-                      boxShape: const NeumorphicBoxShape.circle(),
-                    ),
-                  ),
-                  _buildTrendArrow(trend),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
             title,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: titleFontSize,
               fontWeight: FontWeight.w500,
               color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+          ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                NeumorphicIcon(
+                  icon,
+                  size: iconSize,
+                  style: NeumorphicStyle(
+                    color: color,
+                    depth: 4,
+                    intensity: 0.8,
+                    shape: NeumorphicShape.convex,
+                    boxShape: const NeumorphicBoxShape.circle(),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: valueFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    _buildTrendArrow(trend, arrowSize, percentageFontSize),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -187,27 +126,28 @@ class UserStatsCard extends StatelessWidget {
     );
   }
 
-  // Helper function to build trend arrows
-  Widget _buildTrendArrow(int trend) {
+  // Helper function to build trend arrows with dynamic sizing
+  Widget _buildTrendArrow(int trend, double arrowSize, double percentageFontSize) {
     if (trend == 0) {
-      return const SizedBox.shrink(); // No trend change
+      return const SizedBox.shrink();
     }
 
-    final IconData arrowIcon = trend > 0 ? Icons.arrow_upward : Icons.arrow_downward;
+    final IconData arrowIcon = trend > 0 ? Icons.trending_up : Icons.trending_down;
     final Color arrowColor = trend > 0 ? Colors.green : Colors.red;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           arrowIcon,
-          size: 20,
+          size: arrowSize,
           color: arrowColor,
         ),
         const SizedBox(width: 2),
         Text(
           '${trend.abs()}%',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: percentageFontSize,
             color: arrowColor,
             fontWeight: FontWeight.bold,
           ),
