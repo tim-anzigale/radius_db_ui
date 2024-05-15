@@ -14,14 +14,22 @@ class SubscriptionsView extends StatefulWidget {
 class _SubscriptionsViewState extends State<SubscriptionsView> {
   late Future<List<UserData>> _futureUserData;
   List<UserData> _users = [];
+  List<UserData> _filteredUsers = []; // Filtered list based on search query
   final int _rowsPerPage = 10;
   int _currentPage = 0;
   int _totalPages = 0;
+  final TextEditingController _searchController = TextEditingController(); // Controller for search text field
 
   @override
   void initState() {
     super.initState();
     _futureUserData = parseUserData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose(); // Dispose of the search controller
+    super.dispose();
   }
 
   @override
@@ -37,28 +45,56 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           _users = snapshot.data!;
           _totalPages = (_users.length / _rowsPerPage).ceil();
 
+          // Filter user data based on search query
+          _filteredUsers = _searchController.text.isEmpty
+              ? _users
+              : _users.where((user) {
+                  return user.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                }).toList();
+
           final startIndex = _currentPage * _rowsPerPage;
           final endIndex = (_currentPage + 1) * _rowsPerPage;
-          final List<UserData> pageItems = _users.sublist(
+          final List<UserData> pageItems = _filteredUsers.sublist(
             startIndex,
-            endIndex > _users.length ? _users.length : endIndex,
-          );                      
-        
-
-          
+            endIndex > _filteredUsers.length ? _filteredUsers.length : endIndex,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Text(
-                  'All Subscriptions',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text(
+                      'All Subscriptions',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 200, // Adjust the width as needed
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {}); // Trigger a rebuild on text change
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search...',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
