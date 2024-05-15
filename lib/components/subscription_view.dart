@@ -1,74 +1,26 @@
 import 'package:flutter/material.dart';
 import '../data/data_service.dart';
 import '../user_data.dart';
-
-class UserDataDataSource extends DataTableSource {
-  final List<UserData> userDataList;
-
-  // Constructor accepting userDataList
-  UserDataDataSource(this.userDataList);
-
-  @override
-  int get rowCount => userDataList.length; // Returns the length of the list
-
-  @override
-  DataRow? getRow(int index) {
-    // Check index bounds
-    if (index >= userDataList.length) {
-      return null;
-    }
-    final user = userDataList[index];
-
-    // Return a DataRow for the user
-    return DataRow(
-      cells: [
-        DataCell(Text(user.name)),
-        DataCell(Text(user.ip)),
-        DataCell(Text(user.macAdd)),
-        DataCell(Text(user.planName)),
-        DataCell(
-          Text(
-            user.isDisconnected
-                ? 'Disconnected'
-                : user.isTerminated
-                    ? 'Terminated'
-                    : 'Connected',
-            style: TextStyle(
-              color: user.isDisconnected
-                  ? Colors.red
-                  : user.isTerminated
-                      ? Colors.orange
-                      : Colors.green,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => 0;
-}
+import '../components/pagination.dart';
+import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key});
+  const SubscriptionsView({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
 }
 
 class _SubscriptionsViewState extends State<SubscriptionsView> {
   late Future<List<UserData>> _futureUserData;
-  late UserDataDataSource _dataSource;
+  List<UserData> _users = [];
+  final int _rowsPerPage = 10;
+  int _currentPage = 0;
+  int _totalPages = 0;
 
   @override
   void initState() {
     super.initState();
-    // Call parseUserData() to load and parse data
     _futureUserData = parseUserData();
   }
 
@@ -78,23 +30,28 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
       future: _futureUserData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Display loading indicator while waiting for data
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          // Display error message if an error occurs
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          // Data is loaded successfully
-          final users = snapshot.data!;
-          // Create a data source for the paginated data table
-          _dataSource = UserDataDataSource(users);
+          _users = snapshot.data!;
+          _totalPages = (_users.length / _rowsPerPage).ceil();
 
-          // Display the paginated data table within a container that fills the available width
+          final startIndex = _currentPage * _rowsPerPage;
+          final endIndex = (_currentPage + 1) * _rowsPerPage;
+          final List<UserData> pageItems = _users.sublist(
+            startIndex,
+            endIndex > _users.length ? _users.length : endIndex,
+          );                      
+        
+
+          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Padding(
-                padding: EdgeInsets.all (20.0),
+                padding: EdgeInsets.all(20.0),
                 child: Text(
                   'All Subscriptions',
                   style: TextStyle(
@@ -103,24 +60,83 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: PaginatedDataTable(
-                  columns: const [
-                    DataColumn(label: Text('Name')),
-                    DataColumn(label: Text('IP')),
-                    DataColumn(label: Text('MAC')),
-                    DataColumn(label: Text('Plan')),
-                    DataColumn(label: Text('Status')),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(child: Text('Name', textAlign: TextAlign.center)),
+                    Expanded(child: Text('IP', textAlign: TextAlign.center)),
+                    Expanded(child: Text('NAS', textAlign: TextAlign.center)),
+                    Expanded(child: Text('MAC', textAlign: TextAlign.center)),
+                    Expanded(child: Text('Plan', textAlign: TextAlign.center)),
+                    Expanded(child: Text('Status', textAlign: TextAlign.center)),
                   ],
-                  source: _dataSource,
-                  rowsPerPage: 10, // Adjust as needed
+                ),
+              ),
+              SizedBox(
+                height: 550, // Adjusted to fit the pagination controls
+                child: ListView.builder(
+                  itemCount: pageItems.length,
+                  itemBuilder: (context, index) {
+                    final user = pageItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                      child: FlatNeumorphismDesign(
+                        child: Container(
+                          height: 70, // Minimum height for each row
+                          padding: const EdgeInsets.symmetric(vertical: 10), // Increased padding
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(child: Text(user.name, textAlign: TextAlign.center)),
+                              Expanded(child: Text(user.ip, textAlign: TextAlign.center)),
+                              Expanded(child: Text(user.nas, textAlign: TextAlign.center)),
+                              Expanded(child: Text(user.macAdd, textAlign: TextAlign.center)),
+                              Expanded(child: Text(user.planName, textAlign: TextAlign.center)),
+                              Expanded(
+                                child: Text(
+                                  user.isDisconnected
+                                      ? 'Disconnected'
+                                      : user.isTerminated
+                                          ? 'Terminated'
+                                          : 'Connected',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: user.isDisconnected
+                                        ? Colors.red
+                                        : user.isTerminated
+                                            ? Colors.orange
+                                            : Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: FlatNeumorphismDesign(
+                  child: CustomPagination(
+                    totalPage: _totalPages,
+                    currentPage: _currentPage,
+                    onPageChange: (number) {
+                      setState(() {
+                        _currentPage = number;
+                      });
+                    },
+                    show: 4,
+                  ),
                 ),
               ),
             ],
           );
         } else {
-          // Fallback UI in case of missing data
           return const Center(child: Text('No data available'));
         }
       },

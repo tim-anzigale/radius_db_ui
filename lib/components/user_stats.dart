@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:radius_db_ui/components/user_stats_gridview.dart';
 import '../user_data.dart';
 import '../data/data_service.dart';
-import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import '../components/neumorphic.dart';
 
 class UserStats extends StatefulWidget {
   const UserStats({super.key, required this.userDataList});
@@ -69,59 +69,49 @@ class UserStatsCard extends StatelessWidget {
     double arrowSize = MediaQuery.of(context).size.width < 600 ? 16 : 20;
     double percentageFontSize = MediaQuery.of(context).size.width < 600 ? 12 : 14;
 
-    return Neumorphic(
-      style: NeumorphicStyle(
-        color: Colors.grey[200],
-        depth: 4,
-        intensity: 0.8,
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-      ),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+    return FlatNeumorphismDesign(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
             ),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                NeumorphicIcon(
-                  icon,
-                  size: iconSize,
-                  style: NeumorphicStyle(
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(
+                    icon,
+                    size: iconSize,
                     color: color,
-                    depth: 4,
-                    intensity: 0.8,
-                    shape: NeumorphicShape.convex,
-                    boxShape: const NeumorphicBoxShape.circle(),
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      value,
-                      style: TextStyle(
-                        fontSize: valueFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: color,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: valueFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                       ),
-                    ),
-                    _buildTrendArrow(trend, arrowSize, percentageFontSize),
-                  ],
-                ),
-              ],
+                      _buildTrendArrow(trend, arrowSize, percentageFontSize),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
