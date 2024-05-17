@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/components/pie_chart_widget.dart';
 import '../components/header.dart';
 import '../components/recent_subscriptions_view.dart';
 import '../components/top_plans_view.dart';
-import '../components/subscriptions_chart.dart';
 import '../navigation_drawer.dart';
 import '../user_data.dart';
-import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import '../components/neumorphic.dart';
 
 class HomeScreen extends StatelessWidget {
   final List<UserData> userDataList;
 
-  const HomeScreen({super.key, required this.userDataList});
+  const HomeScreen({Key? key, required this.userDataList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print('UserDataList Length: ${userDataList.length}');
+    for (var user in userDataList) {
+      print('User: ${user.name}, Disconnected: ${user.isDisconnected}, Terminated: ${user.isTerminated}');
+    }
+
     return Scaffold(
       drawer: const SideMenu(),
       appBar: AppBar(
@@ -47,34 +52,13 @@ class HomeScreen extends StatelessWidget {
       mainAxisSpacing: 10.0,
       crossAxisSpacing: 16.0,
       children: [
-        neumorphicContainer(
+        FlatNeumorphismDesign(
           child: TopPlansView(userDataList: userDataList),
-          context: context,
         ),
-        neumorphicContainer(
-          child: SubscriptionsBarChart(userDataList: userDataList),
-          context: context,
+        FlatNeumorphismDesign(
+          child: PieChartWidget(userDataList: userDataList),
         ),
       ],
     );
   }
-}
-
-Widget neumorphicContainer({required Widget child, required BuildContext context}) {
-  return Neumorphic(
-    style: NeumorphicStyle(
-      color: Colors.grey[200],
-      depth: 4, // Adjust depth as desired
-      intensity: 0.8, // Adjust intensity as desired
-      boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)), // Rounded corners
-    ),
-    padding: const EdgeInsets.all(16.0),
-    child: SizedBox(
-      width: double.infinity, // Fill the available width
-      child: InkWell(
-        onTap: () {}, // Add your tap handler here if needed
-        child: child,
-      ),
-    ),
-  );
 }

@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Radius App',
       theme: ThemeData(
+        fontFamily:'Ubuntu_Sans_Mono',
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.blue,
           backgroundColor: Colors.grey.shade200,
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
             color: Colors.grey[800],
             fontWeight: FontWeight.bold,
             fontSize: 18, // Adjust size if necessary
+            fontFamily: 'Ubuntu_Sans_Mono'
           ),
         ),
         drawerTheme: DrawerThemeData(
