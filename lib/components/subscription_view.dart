@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import '../data/data_service.dart';
 import '../user_data.dart';
@@ -114,52 +112,74 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 550,
-                child: ListView.builder(
-                  itemCount: pageItems.length,
-                  itemBuilder: (context, index) {
-                    final user = pageItems[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                      child: FlatNeumorphismDesign(
-                        child: Container(
-                          height: 70,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                              Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                              Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                              Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                              Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                              Expanded(
-                                child: Text(
-                                  user.isDisconnected
-                                      ? 'Disconnected'
-                                      : user.isTerminated
-                                          ? 'Terminated'
-                                          : 'Connected',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: fontSize,
-                                    color: user.isDisconnected
-                                        ? Colors.red
-                                        : user.isTerminated
-                                            ? Colors.orange
-                                            : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+ SizedBox(
+  height: 550,
+  child: ListView.builder(
+    itemCount: pageItems.length,
+    itemBuilder: (context, index) {
+      final user = pageItems[index];
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        child: FlatNeumorphismDesign(
+          child: Container(
+            height: 70,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Adjusted alignment
+              children: [
+                Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                Expanded(
+                  child: Container(
+                    width: 100, // Adjust the width to your preference
+                    margin: const EdgeInsets.only(right: 10), // Adding right margin
+                    decoration: BoxDecoration(
+                      color: user.isDisconnected
+                          ? Colors.red.withOpacity(0.1)
+                          : user.isTerminated
+                              ? Colors.orange.withOpacity(0.1)
+                              : Colors.green.withOpacity(0.1),
+                      border: Border.all(
+                        color: user.isDisconnected
+                            ? Colors.red
+                            : user.isTerminated
+                                ? Colors.orange
+                                : Colors.green,
                       ),
-                    );
-                  },
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: const EdgeInsets.all(5),
+                    child: Text(
+                      user.isDisconnected
+                          ? 'Disconnected'
+                          : user.isTerminated
+                              ? 'Terminated'
+                              : 'Connected',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        color: user.isDisconnected
+                            ? Colors.red
+                            : user.isTerminated
+                                ? Colors.orange
+                                : Colors.green,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  ),
+),
+
+
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 child: Row(

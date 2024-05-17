@@ -8,7 +8,7 @@ class Filters {
     void Function(String?) onChanged, 
     {required double width, required double fontSize}
   ) {
-    return Container(
+    return SizedBox(
       width: width, // Set the width of the dropdown
       child: DropdownButton<String>(
         value: selectedFilter,

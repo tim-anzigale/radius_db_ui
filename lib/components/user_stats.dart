@@ -10,6 +10,7 @@ class UserStats extends StatefulWidget {
   final List<UserData> userDataList;
 
   @override
+  // ignore: library_private_types_in_public_api
   _UserStatsState createState() => _UserStatsState();
 }
 

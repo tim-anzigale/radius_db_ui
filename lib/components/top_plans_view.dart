@@ -4,10 +4,10 @@ import '../user_data.dart'; // Import the UserData class
 import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign
 
 class TopPlansView extends StatefulWidget {
-  const TopPlansView({Key? key, required List<UserData> userDataList})
-      : super(key: key);
+  const TopPlansView({super.key, required List<UserData> userDataList});
 
   @override
+  // ignore: library_private_types_in_public_api
   _TopPlansViewState createState() => _TopPlansViewState();
 }
 

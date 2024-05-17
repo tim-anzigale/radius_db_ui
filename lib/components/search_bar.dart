@@ -9,13 +9,13 @@ class SearchBar extends StatelessWidget {
   final double fontSize;
 
   const SearchBar({
-    Key? key,
+    super.key,
     required this.searchController,
     required this.selectedFilter,
     required this.onFilterChanged,
     required this.filterWidth,
     required this.fontSize,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -11,13 +11,13 @@ class CustomPagination extends StatelessWidget {
   final double fontSize; // Add fontSize parameter
 
   const CustomPagination({
-    Key? key,
+    super.key,
     required this.totalPage,
     required this.currentPage,
     required this.onPageChange,
     this.show = 4,
     this.fontSize = 14.0, // Default font size
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

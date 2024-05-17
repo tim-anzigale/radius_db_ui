@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/components/pie_chart_widget.dart';
 import '../components/header.dart';
 import '../components/recent_subscriptions_view.dart';
 import '../components/top_plans_view.dart';
-import '../components/subscriptions_chart.dart';
 import '../navigation_drawer.dart';
 import '../user_data.dart';
 import '../components/neumorphic.dart';
@@ -10,10 +10,15 @@ import '../components/neumorphic.dart';
 class HomeScreen extends StatelessWidget {
   final List<UserData> userDataList;
 
-  const HomeScreen({super.key, required this.userDataList});
+  const HomeScreen({Key? key, required this.userDataList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print('UserDataList Length: ${userDataList.length}');
+    for (var user in userDataList) {
+      print('User: ${user.name}, Disconnected: ${user.isDisconnected}, Terminated: ${user.isTerminated}');
+    }
+
     return Scaffold(
       drawer: const SideMenu(),
       appBar: AppBar(
@@ -51,11 +56,9 @@ class HomeScreen extends StatelessWidget {
           child: TopPlansView(userDataList: userDataList),
         ),
         FlatNeumorphismDesign(
-          child: SubscriptionsBarChart(userDataList: userDataList),
+          child: PieChartWidget(userDataList: userDataList),
         ),
       ],
     );
   }
 }
-
-
