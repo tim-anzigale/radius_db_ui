@@ -1,11 +1,15 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import '../data/data_service.dart';
 import '../user_data.dart';
 import '../components/pagination.dart';
-import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign
+import '../components/neumorphic.dart';
+import '../components/search_bar.dart' as custom; // Import the new SearchBar file with an alias
+import 'filters.dart'; // Import the Filters class
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({Key? key}) : super(key: key);
+  const SubscriptionsView({super.key});
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
@@ -14,11 +18,12 @@ class SubscriptionsView extends StatefulWidget {
 class _SubscriptionsViewState extends State<SubscriptionsView> {
   late Future<List<UserData>> _futureUserData;
   List<UserData> _users = [];
-  List<UserData> _filteredUsers = []; // Filtered list based on search query
+  List<UserData> _filteredUsers = [];
   final int _rowsPerPage = 10;
   int _currentPage = 0;
   int _totalPages = 0;
-  final TextEditingController _searchController = TextEditingController(); // Controller for search text field
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedFilter; // Selected filter option
 
   @override
   void initState() {
@@ -28,12 +33,17 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
 
   @override
   void dispose() {
-    _searchController.dispose(); // Dispose of the search controller
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double fontSize = screenWidth > 600 ? 12 : 10;
+    final double titleFontSize = screenWidth > 600 ? 16 : 12;
+    final double filterWidth = screenWidth > 600 ? 150 : 100; // Adjust width based on screen size
+
     return FutureBuilder<List<UserData>>(
       future: _futureUserData,
       builder: (context, snapshot) {
@@ -45,7 +55,6 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           _users = snapshot.data!;
           _totalPages = (_users.length / _rowsPerPage).ceil();
 
-          // Filter user data based on search query
           _filteredUsers = _searchController.text.isEmpty
               ? _users
               : _users.where((user) {
@@ -65,39 +74,34 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(20.0),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Text(
                       'All Subscriptions',
                       style: TextStyle(
-                        fontSize: 20.0,
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: 200, // Adjust the width as needed
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {}); // Trigger a rebuild on text change
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: custom.SearchBar(
+                      searchController: _searchController,
+                      selectedFilter: _selectedFilter,
+                      onFilterChanged: (String? newValue) {
+                        setState(() {
+                          _selectedFilter = newValue;
+                        });
+                      },
+                      filterWidth: filterWidth, // Pass adjusted width
+                      fontSize: fontSize, // Pass adjusted font size
                     ),
                   ),
                 ],
               ),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -111,7 +115,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 ),
               ),
               SizedBox(
-                height: 550, // Adjusted to fit the pagination controls
+                height: 550,
                 child: ListView.builder(
                   itemCount: pageItems.length,
                   itemBuilder: (context, index) {
@@ -120,16 +124,16 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                       child: FlatNeumorphismDesign(
                         child: Container(
-                          height: 70, // Minimum height for each row
-                          padding: const EdgeInsets.symmetric(vertical: 10), // Increased padding
+                          height: 70,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Expanded(child: Text(user.name, textAlign: TextAlign.center)),
-                              Expanded(child: Text(user.ip, textAlign: TextAlign.center)),
-                              Expanded(child: Text(user.nas, textAlign: TextAlign.center)),
-                              Expanded(child: Text(user.macAdd, textAlign: TextAlign.center)),
-                              Expanded(child: Text(user.planName, textAlign: TextAlign.center)),
+                              Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                              Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                              Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                              Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                              Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
                               Expanded(
                                 child: Text(
                                   user.isDisconnected
@@ -139,6 +143,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                                           : 'Connected',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
+                                    fontSize: fontSize,
                                     color: user.isDisconnected
                                         ? Colors.red
                                         : user.isTerminated
@@ -156,18 +161,32 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: FlatNeumorphismDesign(
-                  child: CustomPagination(
-                    totalPage: _totalPages,
-                    currentPage: _currentPage,
-                    onPageChange: (number) {
-                      setState(() {
-                        _currentPage = number;
-                      });
-                    },
-                    show: 4,
-                  ),
+                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Showing data ${startIndex + 1} to $endIndex of ${_filteredUsers.length} entries',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        overflow: TextOverflow.ellipsis, // Add this to handle overflow
+                      ),
+                    ),
+                    CustomPagination(
+                      totalPage: _totalPages,
+                      currentPage: _currentPage,
+                      onPageChange: (number) {
+                        setState(() {
+                          _currentPage = number;
+                        });
+                      },
+                      show: 4,
+                      fontSize: fontSize, // Pass adjusted font size to CustomPagination
+                    ),
+                  ],
                 ),
               ),
             ],

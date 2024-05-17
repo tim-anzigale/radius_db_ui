@@ -66,7 +66,7 @@ class FlatNeumorphismDesign extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(11),
         boxShadow: const [
           BoxShadow(color: Color(0xffcccccc), blurRadius: 40, offset: Offset(20, 20)),
           BoxShadow(color: Color(0xffffffff), blurRadius: 40, offset: Offset(-20, -20)),

@@ -1,3 +1,5 @@
+// pagination.dart
+
 import 'package:flutter/material.dart';
 import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign widget
 
@@ -6,6 +8,7 @@ class CustomPagination extends StatelessWidget {
   final int currentPage;
   final ValueChanged<int> onPageChange;
   final int show;
+  final double fontSize; // Add fontSize parameter
 
   const CustomPagination({
     Key? key,
@@ -13,6 +16,7 @@ class CustomPagination extends StatelessWidget {
     required this.currentPage,
     required this.onPageChange,
     this.show = 4,
+    this.fontSize = 14.0, // Default font size
   }) : super(key: key);
 
   @override
@@ -40,7 +44,7 @@ class CustomPagination extends StatelessWidget {
       children: paginationItems.map((widget) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: FlatNeumorphismDesign( // Wrap pagination items with FlatNeumorphismDesign
+          child: FlatNeumorphismDesign(
             child: widget,
           ),
         );
@@ -49,18 +53,22 @@ class CustomPagination extends StatelessWidget {
   }
 
   Widget _buildPageItem(int pageIndex, BuildContext context) {
-    return GestureDetector(
-      onTap: () => onPageChange(pageIndex),
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: pageIndex == currentPage ? Colors.blue : Colors.grey[200],
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Text(
-          '${pageIndex + 1}',
-          style: TextStyle(
-            color: pageIndex == currentPage ? Colors.white : Colors.black,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => onPageChange(pageIndex),
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: pageIndex == currentPage ? Colors.blue : Colors.grey[200],
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: Text(
+            '${pageIndex + 1}',
+            style: TextStyle(
+              fontSize: fontSize,
+              color: pageIndex == currentPage ? Colors.white : Colors.black,
+            ),
           ),
         ),
       ),
