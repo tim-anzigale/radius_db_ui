@@ -3,7 +3,7 @@ import '../user_data.dart';
 import '../components/user_stats.dart';
 
 class UserStatsCardGridView extends StatelessWidget {
-  const UserStatsCardGridView({super.key, required this.userDataList});
+  const UserStatsCardGridView({Key? key, required this.userDataList}) : super(key: key);
 
   final List<UserData> userDataList;
 
@@ -11,11 +11,9 @@ class UserStatsCardGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final int crossAxisCount = screenWidth >= 600 ? 4 : 2;
-    double childAspectRatio ;
-  
+    double childAspectRatio;
 
     // Determine the child aspect ratio based on screen width
-   
     if (screenWidth >= 1200) {
       childAspectRatio = 2.6; // Larger screens (e.g., tablets, laptops)
     } else if (screenWidth >= 800) {
@@ -50,7 +48,7 @@ class UserStatsCardGridView extends StatelessWidget {
               title: 'Total Subscriptions',
               value: totalSubscriptions.toString(),
               color: Colors.green,
-              trend: 5,  // Positive trend
+              trend: 5, // Positive trend
             );
           case 1:
             return UserStatsCard(
@@ -77,7 +75,7 @@ class UserStatsCardGridView extends StatelessWidget {
               trend: -1, // Negative trend
             );
           default:
-            return Container(); // This should not happen
+            return Container();
         }
       },
     );

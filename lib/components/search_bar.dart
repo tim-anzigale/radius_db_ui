@@ -9,13 +9,13 @@ class SearchBar extends StatelessWidget {
   final double fontSize;
 
   const SearchBar({
-    super.key,
+    Key? key,
     required this.searchController,
     required this.selectedFilter,
     required this.onFilterChanged,
     required this.filterWidth,
     required this.fontSize,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,12 @@ class SearchBar extends StatelessWidget {
           const SizedBox(width: 10),
           Filters.buildFilterDropdown(
             selectedFilter,
-            onFilterChanged,
+            (String? newValue) {
+              onFilterChanged(newValue);
+              // Handle filter logic here based on selected filter
+              // For example, you can call a method in the parent widget to handle the filter logic
+              // parentWidget.handleFilter(newValue);
+            },
             width: filterWidth, // Pass adjusted width
             fontSize: fontSize, // Pass adjusted font size
           ),

@@ -1,5 +1,3 @@
-// pagination.dart
-
 import 'package:flutter/material.dart';
 import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign widget
 
@@ -8,7 +6,7 @@ class CustomPagination extends StatelessWidget {
   final int currentPage;
   final ValueChanged<int> onPageChange;
   final int show;
-  final double fontSize; // Add fontSize parameter
+  final double fontSize;
 
   const CustomPagination({
     super.key,
@@ -16,12 +14,18 @@ class CustomPagination extends StatelessWidget {
     required this.currentPage,
     required this.onPageChange,
     this.show = 4,
-    this.fontSize = 14.0, // Default font size
+    this.fontSize = 14.0,
   });
 
   @override
   Widget build(BuildContext context) {
     List<Widget> paginationItems = [];
+
+    // Add previous page button
+    if (currentPage > 0) {
+      paginationItems.add(_buildArrowButton(Icons.keyboard_arrow_left, currentPage - 1));
+    }
+
     int startPage = (currentPage - show ~/ 2).clamp(0, totalPage - show);
     int endPage = (startPage + show).clamp(0, totalPage);
 
@@ -39,6 +43,11 @@ class CustomPagination extends StatelessWidget {
       paginationItems.add(_buildPageItem(totalPage - 1, context));
     }
 
+    // Add next page button
+    if (currentPage < totalPage - 1) {
+      paginationItems.add(_buildArrowButton(Icons.keyboard_arrow_right, currentPage + 1));
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: paginationItems.map((widget) {
@@ -52,22 +61,48 @@ class CustomPagination extends StatelessWidget {
     );
   }
 
+  Widget _buildArrowButton(IconData icon, int pageIndex) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => onPageChange(pageIndex),
+        child: Container(
+          width: 30.0,
+          height: 30.0,
+          decoration: BoxDecoration(
+            color:Colors.grey[200],
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              color: Colors.grey[800],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPageItem(int pageIndex, BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () => onPageChange(pageIndex),
         child: Container(
-          padding: const EdgeInsets.all(8.0),
+          width: 30.0,
+          height: 30.0,
           decoration: BoxDecoration(
-            color: pageIndex == currentPage ? Colors.blue : Colors.grey[200],
+            color: pageIndex == currentPage ? const Color(0xFF403943) : Colors.grey[200],
             borderRadius: BorderRadius.circular(4.0),
           ),
-          child: Text(
-            '${pageIndex + 1}',
-            style: TextStyle(
-              fontSize: fontSize,
-              color: pageIndex == currentPage ? Colors.white : Colors.black,
+          child: Center(
+            child: Text(
+              '${pageIndex + 1}',
+              style: TextStyle(
+                fontSize: fontSize,
+                color: pageIndex == currentPage ? Colors.white : Colors.black,
+              ),
             ),
           ),
         ),

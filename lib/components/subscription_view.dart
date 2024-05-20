@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/components/user_data_search.dart';
 import '../data/data_service.dart';
 import '../user_data.dart';
 import '../components/pagination.dart';
-import '../components/neumorphic.dart';
-import '../components/search_bar.dart' as custom; // Import the new SearchBar file with an alias
+import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
 
 class SubscriptionsView extends StatefulWidget {
@@ -21,18 +21,38 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   int _currentPage = 0;
   int _totalPages = 0;
   final TextEditingController _searchController = TextEditingController();
-  String? _selectedFilter; // Selected filter option
+  String? _selectedFilter;
 
   @override
   void initState() {
     super.initState();
     _futureUserData = parseUserData();
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    List<UserData> filteredList = searchUserData(_users, _searchController.text);
+
+    if (_selectedFilter == 'Terminated') {
+      filteredList = filteredList.where((user) => user.isTerminated).toList();
+    } else if (_selectedFilter == 'Active') {
+      filteredList = filteredList.where((user) => !user.isTerminated && !user.isDisconnected).toList();
+    } else if (_selectedFilter == 'Newest') {
+      filteredList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    setState(() {
+      _filteredUsers = filteredList;
+      _totalPages = (_filteredUsers.length / _rowsPerPage).ceil();
+      _currentPage = 0;
+    });
   }
 
   @override
@@ -40,7 +60,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double fontSize = screenWidth > 600 ? 12 : 10;
     final double titleFontSize = screenWidth > 600 ? 16 : 12;
-    final double filterWidth = screenWidth > 600 ? 150 : 100; // Adjust width based on screen size
+    final double filterWidth = screenWidth > 600 ? 150 : 100;
 
     return FutureBuilder<List<UserData>>(
       future: _futureUserData,
@@ -51,13 +71,8 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           _users = snapshot.data!;
-          _totalPages = (_users.length / _rowsPerPage).ceil();
-
-          _filteredUsers = _searchController.text.isEmpty
-              ? _users
-              : _users.where((user) {
-                  return user.name.toLowerCase().contains(_searchController.text.toLowerCase());
-                }).toList();
+          _filteredUsers = _filteredUsers.isEmpty && _searchController.text.isEmpty ? _users : _filteredUsers;
+          _totalPages = (_filteredUsers.length / _rowsPerPage).ceil();
 
           final startIndex = _currentPage * _rowsPerPage;
           final endIndex = (_currentPage + 1) * _rowsPerPage;
@@ -84,16 +99,24 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: custom.SearchBar(
-                      searchController: _searchController,
-                      selectedFilter: _selectedFilter,
-                      onFilterChanged: (String? newValue) {
-                        setState(() {
-                          _selectedFilter = newValue;
-                        });
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double availableWidth = constraints.maxWidth;
+                        double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
+
+                        return custom.SearchBar(
+                          searchController: _searchController,
+                          selectedFilter: _selectedFilter,
+                          onFilterChanged: (String? newValue) {
+                            setState(() {
+                              _selectedFilter = newValue;
+                              _onSearchChanged();
+                            });
+                          },
+                          filterWidth: adjustedFilterWidth,
+                          fontSize: fontSize,
+                        );
                       },
-                      filterWidth: filterWidth, // Pass adjusted width
-                      fontSize: fontSize, // Pass adjusted font size
                     ),
                   ),
                 ],
@@ -103,83 +126,132 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(child: Text('Name', textAlign: TextAlign.center)),
-                    Expanded(child: Text('IP', textAlign: TextAlign.center)),
-                    Expanded(child: Text('NAS', textAlign: TextAlign.center)),
-                    Expanded(child: Text('MAC', textAlign: TextAlign.center)),
-                    Expanded(child: Text('Plan', textAlign: TextAlign.center)),
-                    Expanded(child: Text('Status', textAlign: TextAlign.center)),
+                    Expanded(
+                      child: Text(
+                        'Name',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'IP',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'NAS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'MAC',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Plan',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Status',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
                   ],
                 ),
               ),
- SizedBox(
-  height: 550,
-  child: ListView.builder(
-    itemCount: pageItems.length,
-    itemBuilder: (context, index) {
-      final user = pageItems[index];
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        child: FlatNeumorphismDesign(
-          child: Container(
-            height: 70,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Adjusted alignment
-              children: [
-                Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                Expanded(
-                  child: Container(
-                    width: 100, // Adjust the width to your preference
-                    margin: const EdgeInsets.only(right: 10), // Adding right margin
-                    decoration: BoxDecoration(
-                      color: user.isDisconnected
-                          ? Colors.red.withOpacity(0.1)
-                          : user.isTerminated
-                              ? Colors.orange.withOpacity(0.1)
-                              : Colors.green.withOpacity(0.1),
-                      border: Border.all(
-                        color: user.isDisconnected
-                            ? Colors.red
-                            : user.isTerminated
-                                ? Colors.orange
-                                : Colors.green,
+              SizedBox(
+                height: 550,
+                child: ListView.builder(
+                  itemCount: pageItems.length,
+                  itemBuilder: (context, index) {
+                    final user = pageItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                      child: Container(
+                        height: 70,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                            Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                            Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                            Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                            Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
+                            if (screenWidth <= 600)
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: user.isDisconnected
+                                      ? Colors.red.withOpacity(0.1)
+                                      : user.isTerminated
+                                          ? Colors.orange.withOpacity(0.1)
+                                          : Colors.green.withOpacity(0.1),
+                                  border: Border.all(
+                                    color: user.isDisconnected
+                                        ? Colors.red
+                                        : user.isTerminated
+                                            ? Colors.orange
+                                            : Colors.green,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                            else
+                              Container(
+                                width: 200,
+                                decoration: BoxDecoration(
+                                  color: user.isDisconnected
+                                      ? Colors.red.withOpacity(0.1)
+                                      : user.isTerminated
+                                          ? Colors.orange.withOpacity(0.1)
+                                          : Colors.green.withOpacity(0.1),
+                                  border: Border.all(
+                                    color: user.isDisconnected
+                                        ? Colors.red
+                                        : user.isTerminated
+                                            ? Colors.orange
+                                            : Colors.green,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                padding: const EdgeInsets.all(5),
+                                child: Text(
+                                  user.isDisconnected
+                                      ? 'Disconnected'
+                                      : user.isTerminated
+                                          ? 'Terminated'
+                                          : 'Connected',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    color: user.isDisconnected
+                                        ? Colors.red
+                                        : user.isTerminated
+                                            ? Colors.orange
+                                            : Colors.green,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      user.isDisconnected
-                          ? 'Disconnected'
-                          : user.isTerminated
-                              ? 'Terminated'
-                              : 'Connected',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        color: user.isDisconnected
-                            ? Colors.red
-                            : user.isTerminated
-                                ? Colors.orange
-                                : Colors.green,
-                      ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  ),
-),
-
-
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 child: Row(
@@ -192,7 +264,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                           fontSize: 12,
                           color: Colors.grey,
                         ),
-                        overflow: TextOverflow.ellipsis, // Add this to handle overflow
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     CustomPagination(
@@ -204,7 +276,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                         });
                       },
                       show: 4,
-                      fontSize: fontSize, // Pass adjusted font size to CustomPagination
+                      fontSize: fontSize,
                     ),
                   ],
                 ),

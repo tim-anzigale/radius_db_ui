@@ -14,10 +14,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('UserDataList Length: ${userDataList.length}');
-    for (var user in userDataList) {
-      print('User: ${user.name}, Disconnected: ${user.isDisconnected}, Terminated: ${user.isTerminated}');
-    }
+    printUserInfo(); // Print user info for debugging purposes
 
     return Scaffold(
       drawer: const SideMenu(),
@@ -30,13 +27,23 @@ class HomeScreen extends StatelessWidget {
           children: [
             const CustomHeader(),
             const SizedBox(height: 5),
-            RecentSubscriptionsView(userDataList: userDataList),
+            FlatNeumorphismDesign(
+              child: RecentSubscriptionsView(userDataList: userDataList),
+            ),
             const SizedBox(height: 10),
             _buildGridSection(context),
           ],
         ),
       ),
     );
+  }
+
+  // Helper function to print user information for debugging
+  void printUserInfo() {
+    print('UserDataList Length: ${userDataList.length}');
+    for (var user in userDataList) {
+      print('User: ${user.name}, Disconnected: ${user.isDisconnected}, Terminated: ${user.isTerminated}');
+    }
   }
 
   // Helper function to build the grid section

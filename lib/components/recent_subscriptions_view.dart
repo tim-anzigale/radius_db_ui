@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import '../data/data_service.dart'; // Import parseUserData from data_service.dart
 import '../user_data.dart'; // Import the UserData class
-import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign
 
 class RecentSubscriptionsView extends StatefulWidget {
   const RecentSubscriptionsView({super.key, required List<UserData> userDataList});
 
   @override
-  // ignore: library_private_types_in_public_api
   _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
 }
 
@@ -49,9 +47,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
             builder: (context, constraints) {
               // Recalculate font size based on screen width
               _fontSize = constraints.maxWidth > 600 ? 12 : 10;
-              return FlatNeumorphismDesign( // Wrap with FlatNeumorphismDesign
-                child: _buildRecentSubscriptions(context),
-              );
+              return _buildRecentSubscriptions(context);
             },
           );
         } else {
@@ -62,6 +58,8 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
   }
 
   Widget _buildRecentSubscriptions(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -102,19 +100,56 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               final user = _filteredUsers[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                child: FlatNeumorphismDesign(
-                  child: Container(
-                    height: 70, // Minimum height for each row
-                    padding: const EdgeInsets.symmetric(vertical: 10), // Increased padding
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                        Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                        Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                        Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                        Expanded(child: Text(user.createdAtString, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))), // Using createdAtString
-                        Expanded(
+                child: Container(
+                  height: 70, // Minimum height for each row
+                  padding: const EdgeInsets.symmetric(vertical: 10), // Increased padding
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
+                      Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
+                      Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
+                      Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
+                      Expanded(child: Text(user.createdAtString, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))), // Using createdAtString
+                      if (screenWidth <= 600)
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: user.isDisconnected
+                                ? Colors.red.withOpacity(0.1)
+                                : user.isTerminated
+                                    ? Colors.orange.withOpacity(0.1)
+                                    : Colors.green.withOpacity(0.1),
+                            border: Border.all(
+                              color: user.isDisconnected
+                                  ? Colors.red
+                                  : user.isTerminated
+                                      ? Colors.orange
+                                      : Colors.green,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      else
+                        Container(
+                          width: 200,
+                          decoration: BoxDecoration(
+                            color: user.isDisconnected
+                                ? Colors.red.withOpacity(0.1)
+                                : user.isTerminated
+                                    ? Colors.orange.withOpacity(0.1)
+                                    : Colors.green.withOpacity(0.1),
+                            border: Border.all(
+                              color: user.isDisconnected
+                                  ? Colors.red
+                                  : user.isTerminated
+                                      ? Colors.orange
+                                      : Colors.green,
+                            ),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          padding: const EdgeInsets.all(5),
                           child: Text(
                             user.isDisconnected
                                 ? 'Disconnected'
@@ -132,8 +167,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
               );

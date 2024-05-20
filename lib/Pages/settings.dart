@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme_provider.dart'; // Import the theme provider
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -22,20 +26,11 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Notifications'),
-              trailing: Switch(
-                value: true, // Replace with actual value from preferences
-                onChanged: (value) {
-                  // Update notification preference
-                },
-              ),
-            ),
-            ListTile(
               title: const Text('Dark Mode'),
               trailing: Switch(
-                value: false, // Replace with actual value from preferences
+                value: themeProvider.themeMode == ThemeMode.dark,
                 onChanged: (value) {
-                  // Update dark mode preference
+                  themeProvider.toggleTheme(value);
                 },
               ),
             ),

@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import '../data/data_service.dart'; // Import parseUserData from data_service.dart
-import '../user_data.dart'; // Import the UserData class
-import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign
+import '../data/data_service.dart';
+import '../user_data.dart';
+import '../components/neumorphic.dart';
 
 class TopPlansView extends StatefulWidget {
-  const TopPlansView({super.key, required List<UserData> userDataList});
+  final List<UserData> userDataList;
+
+  const TopPlansView({Key? key, required this.userDataList}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _TopPlansViewState createState() => _TopPlansViewState();
 }
 
 class _TopPlansViewState extends State<TopPlansView> {
   late Future<List<UserData>> _futureUserData;
-  double _fontSize = 12; // Initial font size
+  double _fontSize = 12;
 
   @override
   void initState() {
     super.initState();
-    // Load and parse user data asynchronously
-    _futureUserData = parseUserData();
+    _futureUserData = parseUserData(); // Load and parse user data asynchronously
   }
 
   @override
@@ -34,11 +34,9 @@ class _TopPlansViewState extends State<TopPlansView> {
         } else if (snapshot.hasData && snapshot.data!.isEmpty) {
           return const Center(child: Text('No data available'));
         } else {
-          // Data loaded successfully
           final sortedPlans = _getSortedPlans(snapshot.data!);
           return LayoutBuilder(
             builder: (context, constraints) {
-              // Recalculate font size based on screen width
               _fontSize = constraints.maxWidth > 600 ? 12 : 9;
               return _buildTopPlansSection(context, sortedPlans);
             },
@@ -48,7 +46,6 @@ class _TopPlansViewState extends State<TopPlansView> {
     );
   }
 
-  // Function to calculate and sort plans based on user data
   List<MapEntry<String, int>> _getSortedPlans(List<UserData> userDataList) {
     final Map<String, int> planFrequency = {};
     for (var user in userDataList) {
@@ -59,7 +56,6 @@ class _TopPlansViewState extends State<TopPlansView> {
     return sortedPlans;
   }
 
-  // Function to build the top plans section
   Widget _buildTopPlansSection(
       BuildContext context, List<MapEntry<String, int>> sortedPlans) {
     return Column(
@@ -74,30 +70,17 @@ class _TopPlansViewState extends State<TopPlansView> {
     );
   }
 
-  // Function to build the title section
   Widget _buildTitleSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Top Plans',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              // Handle "View All" action (e.g., navigate to another screen)
-            },
-            child: Text(
-              'View All',
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).primaryColor,
-              ),
             ),
           ),
         ],
@@ -105,7 +88,6 @@ class _TopPlansViewState extends State<TopPlansView> {
     );
   }
 
-  // Function to build the list of top plans
   Widget _buildTopPlansList(
       BuildContext context, List<MapEntry<String, int>> sortedPlans) {
     return ListView.builder(
@@ -115,23 +97,21 @@ class _TopPlansViewState extends State<TopPlansView> {
         final frequency = sortedPlans[index].value;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: FlatNeumorphismDesign(
-            child: ListTile(
-              title: Text(
-                planName,
-                style: TextStyle(fontSize: _fontSize), // Apply font size
-              ),
-              trailing: Text(
-                '$frequency users',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              tileColor: Colors.grey[100], // Light grey background for each item
+          child: ListTile(
+            title: Text(
+              planName,
+              style: TextStyle(fontSize: _fontSize),
             ),
+            trailing: Text(
+              '$frequency',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            tileColor: Colors.grey[100],
           ),
         );
       },
