@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './Pages/settings.dart'; // Import your settings page
 import './components/neumorphic.dart'; // Import the file containing FlatNeumorphismDesign
+import './theme_provider.dart'; // Import the theme provider
 
 class SideMenu extends StatefulWidget {
   const SideMenu({Key? key}) : super(key: key);
@@ -20,6 +22,9 @@ class _SideMenuState extends State<SideMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -27,7 +32,7 @@ class _SideMenuState extends State<SideMenu> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
-                _buildDrawerHeader(),
+                _buildDrawerHeader(isDarkMode),
                 _buildDrawerTile(
                   icon: Icons.home,
                   text: 'Dashboard',
@@ -38,6 +43,7 @@ class _SideMenuState extends State<SideMenu> {
                     // Navigate to the home screen
                     Navigator.pushReplacementNamed(context, '/home');
                   },
+                  isDarkMode: isDarkMode,
                 ),
                 _buildDrawerTile(
                   icon: Icons.person,
@@ -49,6 +55,7 @@ class _SideMenuState extends State<SideMenu> {
                     // Navigate to the subscriptions page
                     Navigator.pushReplacementNamed(context, '/subscriptions');
                   },
+                  isDarkMode: isDarkMode,
                 ),
                 _buildDrawerTile(
                   icon: Icons.settings,
@@ -60,6 +67,7 @@ class _SideMenuState extends State<SideMenu> {
                     // Navigate to the settings page
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
                   },
+                  isDarkMode: isDarkMode,
                 ),
               ],
             ),
@@ -71,21 +79,22 @@ class _SideMenuState extends State<SideMenu> {
               leading: const CircleAvatar(
                 backgroundImage: NetworkImage('https://example.com/your-profile-picture.jpg'),
               ),
-              title: const Text(
+              title: Text(
                 'Tim',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  color: isDarkMode ? Colors.grey[200] : Colors.grey[900], // Text color based on theme
                 ),
               ),
-              subtitle: const Text(
+              subtitle: Text(
                 'System Admin',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey, // Subtitle color based on theme
                 ),
               ),
-              trailing: const Icon(Icons.keyboard_arrow_down),
+              trailing: Icon(Icons.keyboard_arrow_down, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
               onTap: () {
                 // Handle profile tile tap
               },
@@ -97,23 +106,23 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
-  Widget _buildDrawerHeader() {
+  Widget _buildDrawerHeader(bool isDarkMode) {
     return Container(
       height: 100,
       alignment: Alignment.center,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200], // Darker base color
+        color: isDarkMode ? const Color(0xFF2E2E2E) : Colors.grey[200], // Background color based on theme
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.computer, color: Colors.grey[900]),
+          Icon(Icons.computer, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
           const SizedBox(width: 10),
           Text(
             'Radius',
             style: TextStyle(
-              color: Colors.grey[900],
+              color: isDarkMode ? Colors.grey[200] : Colors.grey[900],
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -128,19 +137,21 @@ class _SideMenuState extends State<SideMenu> {
     required String text,
     required bool isSelected,
     required VoidCallback onTap,
+    required bool isDarkMode,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: Material(
-        color: isSelected ? Colors.blueGrey[100] : Colors.transparent,
+        color: isSelected ? (isDarkMode ? Colors.blueGrey[800] : Colors.blueGrey[100]) : Colors.transparent,
         elevation: isSelected ? 2 : 0,
         borderRadius: BorderRadius.circular(10),
         child: _HoverableListTile(
           icon: icon,
           text: text,
           isSelected: isSelected,
-          onTap: onTap,
-          hoverColor: const Color(0xFF403943),
+          onTap: onTap, //const Color(0xFFE0E0E0)
+          hoverColor: isDarkMode ? const Color(0xFF403943) :  const Color(0xFF403943),
+          isDarkMode: isDarkMode,
         ),
       ),
     );
@@ -153,6 +164,7 @@ class _HoverableListTile extends StatefulWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final Color hoverColor;
+  final bool isDarkMode;
 
   const _HoverableListTile({
     required this.icon,
@@ -160,6 +172,7 @@ class _HoverableListTile extends StatefulWidget {
     required this.isSelected,
     required this.onTap,
     required this.hoverColor,
+    required this.isDarkMode,
   });
 
   @override
@@ -171,7 +184,7 @@ class _HoverableListTileState extends State<_HoverableListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final Color? textColor = _isHovered ? Colors.white : (widget.isSelected ? Colors.blueGrey[800] : Colors.grey[800]);
+    final Color? textColor = _isHovered ? Colors.white : (widget.isSelected ? Colors.blueGrey[800] : (widget.isDarkMode ? Colors.grey[200] : Colors.grey[800]));
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -197,7 +210,7 @@ class _HoverableListTileState extends State<_HoverableListTile> {
               widget.text,
               style: TextStyle(
                 color: textColor,
-                fontSize: 12, // Adjusted font size
+                fontSize: 13, // Adjusted font size
               ),
             ),
             trailing: Icon(Icons.keyboard_arrow_right, color: textColor),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:radius_db_ui/components/view_all.dart';
+import 'package:radius_db_ui/pages/subscriptions_page.dart';
 import '../data/data_service.dart'; // Import parseUserData from data_service.dart
 import '../user_data.dart'; // Import the UserData class
+import '../Pages/view_all_page.dart';
 
 class RecentSubscriptionsView extends StatefulWidget {
   const RecentSubscriptionsView({super.key, required List<UserData> userDataList});
@@ -46,7 +49,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
           return LayoutBuilder(
             builder: (context, constraints) {
               // Recalculate font size based on screen width
-              _fontSize = constraints.maxWidth > 600 ? 12 : 10;
+              _fontSize = constraints.maxWidth > 600 ? 13 : 10;
               return _buildRecentSubscriptions(context);
             },
           );
@@ -76,19 +79,27 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                 ),
               ),
             ),
+             ViewAllText(
+            onTap: () {
+               Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ViewAllSubscriptionsPage(userDataList: [],)));
+            
+              
+            }),
           ],
         ),
+       
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(child: Text('Name', textAlign: TextAlign.center)),
-              Expanded(child: Text('IP', textAlign: TextAlign.center)),
-              Expanded(child: Text('NAS', textAlign: TextAlign.center)),
-              Expanded(child: Text('MAC', textAlign: TextAlign.center)),
-              Expanded(child: Text('Connection Date', textAlign: TextAlign.center)),
-              Expanded(child: Text('Status', textAlign: TextAlign.center)),
+              Expanded(child: Text('Name', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+              Expanded(child: Text('IP', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+              Expanded(child: Text('NAS', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+              Expanded(child: Text('MAC', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+              Expanded(child: Text('Connection Date', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+              Expanded(child: Text('Status', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
             ],
           ),
         ),

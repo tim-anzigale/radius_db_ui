@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './Pages/home_screen.dart'; // Import your HomeScreen
-import './Pages/subscriptions_page.dart'; // Import SubscriptionsPage
+
+import './pages/home_screen.dart'; // Import your HomeScreen
+import './pages/subscriptions_page.dart'; // Import SubscriptionsPage
+import './pages/settings.dart'; // Import the settings page
 import 'user_data.dart'; // Import your user data class
 import 'theme_provider.dart'; // Import the theme provider
-import './Pages/settings.dart'; // Import the settings page
+import './Theme/theme_manager.dart'; // Import the theme manager
 
 void main() {
   runApp(
@@ -28,85 +30,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Radius App',
       themeMode: themeProvider.themeMode,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.blue,
-          backgroundColor: Colors.grey.shade200,
-        ),
-        scaffoldBackgroundColor: Colors.grey.shade200,
-        textTheme: ThemeData.light().textTheme.apply(
-              fontFamily: 'Ubuntu_Sans_Mono',
-            ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey[800],
-          elevation: 0,
-          iconTheme: IconThemeData(color: Colors.grey[800]),
-          titleTextStyle: TextStyle(
-            color: Colors.grey[800],
-            fontWeight: FontWeight.bold,
-            fontSize: 18, // Adjust size if necessary
-            fontFamily: 'Ubuntu_Sans_Mono',
-          ),
-        ),
-        drawerTheme: DrawerThemeData(
-          backgroundColor: Colors.grey.shade200,
-        ),
-        dataTableTheme: DataTableThemeData(
-          headingRowColor: MaterialStateProperty.all(Colors.grey.shade200),
-          dataRowColor: MaterialStateProperty.all(Colors.grey.shade100),
-          headingTextStyle: TextStyle(
-            color: Colors.grey[800],
-            fontWeight: FontWeight.bold,
-          ),
-          dataTextStyle: TextStyle(
-            color: Colors.grey[800],
-          ),
-          dividerThickness: 1.5, // Adjust as necessary
-        ),
-      ),
-      darkTheme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.blue,
-          backgroundColor: Colors.grey.shade900,
-        ),
-        scaffoldBackgroundColor: Colors.grey.shade900,
-        textTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'Ubuntu_Sans_Mono',
-            ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.grey.shade900,
-          foregroundColor: Colors.grey[300],
-          elevation: 0,
-          iconTheme: IconThemeData(color: Colors.grey[300]),
-          titleTextStyle: TextStyle(
-            color: Colors.grey[300],
-            fontWeight: FontWeight.bold,
-            fontSize: 18, // Adjust size if necessary
-            fontFamily: 'Ubuntu_Sans_Mono',
-          ),
-        ),
-        drawerTheme: DrawerThemeData(
-          backgroundColor: Colors.grey.shade900,
-        ),
-        dataTableTheme: DataTableThemeData(
-          headingRowColor: MaterialStateProperty.all(Colors.grey.shade900),
-          dataRowColor: MaterialStateProperty.all(Colors.grey.shade800),
-          headingTextStyle: TextStyle(
-            color: Colors.grey[300],
-            fontWeight: FontWeight.bold,
-          ),
-          dataTextStyle: TextStyle(
-            color: Colors.grey[300],
-          ),
-          dividerThickness: 1.5, // Adjust as necessary
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeManager.buildLightTheme(),
+      darkTheme: ThemeManager.buildDarkTheme(),
       initialRoute: '/home',
       routes: {
         '/home': (context) => HomeScreen(userDataList: userDataList),
         '/subscriptions': (context) => SubscriptionsPage(userDataList: userDataList),
-        '/settings': (context) => const SettingsPage(), // Add the settings page route
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }

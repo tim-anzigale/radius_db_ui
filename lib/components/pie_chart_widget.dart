@@ -20,7 +20,7 @@ class PieChartWidget extends StatelessWidget {
     print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');
 
     if (userDataList.isEmpty) {
-      return const Center(child: Text('No data available'));
+      return const Center(child: Text(''));
     }
 
     userDataList.forEach((userData) {

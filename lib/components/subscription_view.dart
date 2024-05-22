@@ -41,11 +41,13 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     List<UserData> filteredList = searchUserData(_users, _searchController.text);
 
     if (_selectedFilter == 'Terminated') {
-      filteredList = filteredList.where((user) => user.isTerminated).toList();
-    } else if (_selectedFilter == 'Active') {
-      filteredList = filteredList.where((user) => !user.isTerminated && !user.isDisconnected).toList();
+      filteredList = filteredList.where((user) => user.isTerminated && !user.isDisconnected).toList();
+    } else if (_selectedFilter == 'Disconnected') {
+      filteredList = filteredList.where((user) => !user.isTerminated && user.isDisconnected).toList();
     } else if (_selectedFilter == 'Newest') {
       filteredList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }  else if (_selectedFilter == 'Connected') {
+      filteredList = filteredList.where((user) => !user.isTerminated && !user.isDisconnected).toList();
     }
 
     setState(() {
@@ -58,7 +60,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double fontSize = screenWidth > 600 ? 12 : 10;
+    final double fontSize = screenWidth > 600 ? 13 : 10;
     final double titleFontSize = screenWidth > 600 ? 16 : 12;
     final double filterWidth = screenWidth > 600 ? 150 : 100;
 

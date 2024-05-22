@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../data/data_service.dart';
 import '../user_data.dart';
 import '../components/neumorphic.dart';
+import '../theme_provider.dart'; // Import the theme provider
 
 class TopPlansView extends StatefulWidget {
   final List<UserData> userDataList;
@@ -14,7 +16,7 @@ class TopPlansView extends StatefulWidget {
 
 class _TopPlansViewState extends State<TopPlansView> {
   late Future<List<UserData>> _futureUserData;
-  double _fontSize = 12;
+  double _fontSize = 13;
 
   @override
   void initState() {
@@ -37,7 +39,7 @@ class _TopPlansViewState extends State<TopPlansView> {
           final sortedPlans = _getSortedPlans(snapshot.data!);
           return LayoutBuilder(
             builder: (context, constraints) {
-              _fontSize = constraints.maxWidth > 600 ? 12 : 9;
+              // _fontSize = constraints.maxWidth > 600 ? 12 : 9;
               return _buildTopPlansSection(context, sortedPlans);
             },
           );
@@ -71,8 +73,8 @@ class _TopPlansViewState extends State<TopPlansView> {
   }
 
   Widget _buildTitleSection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
+    return const Padding(
+      padding: EdgeInsets.all(20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -90,28 +92,35 @@ class _TopPlansViewState extends State<TopPlansView> {
 
   Widget _buildTopPlansList(
       BuildContext context, List<MapEntry<String, int>> sortedPlans) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return ListView.builder(
       itemCount: sortedPlans.length,
       itemBuilder: (context, index) {
         final planName = sortedPlans[index].key;
         final frequency = sortedPlans[index].value;
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
           child: ListTile(
             title: Text(
               planName,
-              style: TextStyle(fontSize: _fontSize),
+              style: TextStyle(
+                fontSize: _fontSize,
+                color: isDarkMode ? Colors.grey[200] : Colors.black,
+              ),
             ),
             trailing: Text(
               '$frequency',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.grey[200] : Colors.black,
               ),
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            tileColor: Colors.grey[100],
+            tileColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
           ),
         );
       },
