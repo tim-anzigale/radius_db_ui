@@ -1,68 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme_provider.dart'; // Import the theme provider
 
 class CustomHeader extends StatelessWidget {
   const CustomHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        
+        color: isDarkMode ? Colors.grey.shade900 : Colors.grey[200], // Background color based on theme
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Hello Admin 👋', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-         
-        ],
-      ),
-    );
-  }
-}
- 
-
-class CustomHeadertwo extends StatelessWidget {
-  const CustomHeadertwo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Subscriptions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-         
-        ],
-      ),
-    );
-  }
-}
-
-
-
-class CustomHeaderthree extends StatelessWidget {
-  const CustomHeaderthree({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Recent Subscriptions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-         
+          Text(
+            'Hello Admin 👋',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.grey[200] : Colors.black, // Text color based on theme
+            ),
+          ),
         ],
       ),
     );

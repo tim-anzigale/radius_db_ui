@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme_provider.dart'; // Import the theme provider
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -14,53 +19,66 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
+            Text(
               'General Settings',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.grey[200] : Colors.black,
               ),
             ),
             ListTile(
-              title: const Text('Notifications'),
-              trailing: Switch(
-                value: true, // Replace with actual value from preferences
-                onChanged: (value) {
-                  // Update notification preference
-                },
+              title: Text(
+                'Dark Mode',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[200] : Colors.black,
+                ),
               ),
-            ),
-            ListTile(
-              title: const Text('Dark Mode'),
               trailing: Switch(
-                value: false, // Replace with actual value from preferences
+                value: themeProvider.themeMode == ThemeMode.dark,
                 onChanged: (value) {
-                  // Update dark mode preference
+                  themeProvider.toggleTheme(value);
                 },
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Account Settings',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.grey[200] : Colors.black,
               ),
             ),
             ListTile(
-              title: const Text('Edit Profile'),
+              title: Text(
+                'Edit Profile',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[200] : Colors.black,
+                ),
+              ),
               onTap: () {
                 // Navigate to profile editing page
               },
             ),
             ListTile(
-              title: const Text('Change Password'),
+              title: Text(
+                'Change Password',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[200] : Colors.black,
+                ),
+              ),
               onTap: () {
                 // Navigate to password change page
               },
             ),
             ListTile(
-              title: const Text('Logout'),
+              title: Text(
+                'Logout',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[200] : Colors.black,
+                ),
+              ),
               onTap: () {
                 // Perform logout action
               },

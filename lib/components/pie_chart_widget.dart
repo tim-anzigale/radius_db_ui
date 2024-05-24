@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../user_data.dart';
@@ -9,15 +10,22 @@ class PieChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int connectedCount = userDataList.where((user) => !user.isDisconnected && !user.isTerminated).length;
-    int disconnectedCount = userDataList.where((user) => user.isDisconnected).length;
-    int terminatedCount = userDataList.where((user) => user.isTerminated).length;
+    int connectedCount = userDataList.where((userData) => !userData.isDisconnected && !userData.isTerminated).length;
+    int disconnectedCount = userDataList.where((userData) => userData.isDisconnected).length;
+    int terminatedCount = userDataList.where((userData) => userData.isTerminated).length;
 
-    print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount'); // Debug print
+    if (kDebugMode) {
+      print('UserDataList Length: ${userDataList.length}');
+    }
+    print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');
 
     if (userDataList.isEmpty) {
-      return Center(child: Text('No data available'));
+      return const Center(child: Text(''));
     }
+
+    userDataList.forEach((userData) {
+      print('User: ${userData.name}, IP: ${userData.ip}, Plan: ${userData.planName}');
+    });
 
     return PieChart(
       PieChartData(
@@ -27,21 +35,21 @@ class PieChartWidget extends StatelessWidget {
             value: connectedCount.toDouble(),
             title: 'Connected\n$connectedCount',
             radius: 50,
-            titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           PieChartSectionData(
             color: Colors.red,
             value: disconnectedCount.toDouble(),
             title: 'Disconnected\n$disconnectedCount',
             radius: 50,
-            titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           PieChartSectionData(
             color: Colors.grey,
             value: terminatedCount.toDouble(),
             title: 'Terminated\n$terminatedCount',
             radius: 50,
-            titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
         sectionsSpace: 2,
