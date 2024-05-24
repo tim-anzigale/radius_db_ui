@@ -123,135 +123,66 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 ],
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Name',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'IP',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'NAS',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'MAC',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Plan',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Status',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 550,
-                child: ListView.builder(
-                  itemCount: pageItems.length,
-                  itemBuilder: (context, index) {
-                    final user = pageItems[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                      child: Container(
-                        height: 70,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Row(
-                          children: [
-                            Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                            Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                            Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                            Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                            Expanded(child: Text(user.planName, textAlign: TextAlign.center, style: TextStyle(fontSize: fontSize))),
-                            if (screenWidth <= 600)
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  color: user.isDisconnected
-                                      ? Colors.red.withOpacity(0.1)
-                                      : user.isTerminated
-                                          ? Colors.orange.withOpacity(0.1)
-                                          : Colors.green.withOpacity(0.1),
-                                  border: Border.all(
-                                    color: user.isDisconnected
-                                        ? Colors.red
-                                        : user.isTerminated
-                                            ? Colors.orange
-                                            : Colors.green,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                              )
-                            else
-                              Container(
-                                width: 200,
-                                decoration: BoxDecoration(
-                                  color: user.isDisconnected
-                                      ? Colors.red.withOpacity(0.1)
-                                      : user.isTerminated
-                                          ? Colors.orange.withOpacity(0.1)
-                                          : Colors.green.withOpacity(0.1),
-                                  border: Border.all(
-                                    color: user.isDisconnected
-                                        ? Colors.red
-                                        : user.isTerminated
-                                            ? Colors.orange
-                                            : Colors.green,
-                                  ),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                padding: const EdgeInsets.all(5),
-                                child: Text(
-                                  user.isDisconnected
-                                      ? 'Disconnected'
-                                      : user.isTerminated
-                                          ? 'Terminated'
-                                          : 'Connected',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: fontSize,
-                                    color: user.isDisconnected
-                                        ? Colors.red
-                                        : user.isTerminated
-                                            ? Colors.orange
-                                            : Colors.green,
-                                  ),
-                                ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  child: DataTable(
+                    columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
+                    columns: [
+                      DataColumn(label: Text('Name', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize))),
+                    ],
+                    rows: pageItems.map((user) {
+                      return DataRow(
+                        cells: [
+                          DataCell(Text(user.name, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(user.ip, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(user.nas, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(user.macAdd, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(user.planName, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Container(
+                            width: 110,
+                            decoration: BoxDecoration(
+                              color: user.isDisconnected
+                                  ? Colors.red.withOpacity(0.1)
+                                  : user.isTerminated
+                                      ? Colors.orange.withOpacity(0.1)
+                                      : Colors.green.withOpacity(0.1),
+                              border: Border.all(
+                                color: user.isDisconnected
+                                    ? Colors.red
+                                    : user.isTerminated
+                                        ? Colors.orange
+                                        : Colors.green,
                               ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Text(
+                              user.isDisconnected
+                                  ? 'Disconnected'
+                                  : user.isTerminated
+                                      ? 'Terminated'
+                                      : 'Connected',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                color: user.isDisconnected
+                                    ? Colors.red
+                                    : user.isTerminated
+                                        ? Colors.orange
+                                        : Colors.green,
+                              ),
+                            ),
+                          )),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
               Padding(

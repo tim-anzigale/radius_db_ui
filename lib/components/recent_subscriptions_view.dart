@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:radius_db_ui/components/view_all.dart';
-import 'package:radius_db_ui/pages/subscriptions_page.dart';
-import '../data/data_service.dart'; // Import parseUserData from data_service.dart
-import '../user_data.dart'; // Import the UserData class
+import '../data/data_service.dart';
+import '../user_data.dart';
 import '../Pages/view_all_page.dart';
 
 class RecentSubscriptionsView extends StatefulWidget {
-  const RecentSubscriptionsView({super.key, required List<UserData> userDataList});
+  const RecentSubscriptionsView({super.key, required this.userDataList});
+
+  final List<UserData> userDataList;
 
   @override
   _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
@@ -26,7 +27,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
 
   void _filterRecentUsers() {
     final DateTime now = DateTime.now();
-    final DateTime cutoffDate = now.subtract(const Duration(days: 60));
+    final DateTime cutoffDate = now.subtract(const Duration(days: 30));
 
     _filteredUsers = _users.where((user) {
       return user.createdAt.isAfter(cutoffDate);
@@ -64,7 +65,6 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,115 +74,80 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               child: Text(
                 'Recent Subscriptions',
                 style: TextStyle(
-                  fontSize: _fontSize + 4, // Slightly larger for the title
+                  fontSize: _fontSize + 4,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-             ViewAllText(
-            onTap: () {
-               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ViewAllSubscriptionsPage(userDataList: [],)));
-            
-              
-            }),
+            ViewAllText(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ViewAllSubscriptionsPage(userDataList: _users),
+                ));
+              },
+            ),
           ],
         ),
-       
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(child: Text('Name', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-              Expanded(child: Text('IP', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-              Expanded(child: Text('NAS', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-              Expanded(child: Text('MAC', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-              Expanded(child: Text('Connection Date', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-              Expanded(child: Text('Status', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 550, // Adjusted to fit the pagination controls
-          child: ListView.builder(
-            itemCount: _filteredUsers.length > 10 ? 10 : _filteredUsers.length, // Limit to 10 items
-            itemBuilder: (context, index) {
-              final user = _filteredUsers[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                child: Container(
-                  height: 70, // Minimum height for each row
-                  padding: const EdgeInsets.symmetric(vertical: 10), // Increased padding
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(child: Text(user.name, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                      Expanded(child: Text(user.ip, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                      Expanded(child: Text(user.nas, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                      Expanded(child: Text(user.macAdd, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))),
-                      Expanded(child: Text(user.createdAtString, textAlign: TextAlign.center, style: TextStyle(fontSize: _fontSize))), // Using createdAtString
-                      if (screenWidth <= 600)
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: user.isDisconnected
-                                ? Colors.red.withOpacity(0.1)
-                                : user.isTerminated
-                                    ? Colors.orange.withOpacity(0.1)
-                                    : Colors.green.withOpacity(0.1),
-                            border: Border.all(
-                              color: user.isDisconnected
-                                  ? Colors.red
-                                  : user.isTerminated
-                                      ? Colors.orange
-                                      : Colors.green,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 200,
-                          decoration: BoxDecoration(
-                            color: user.isDisconnected
-                                ? Colors.red.withOpacity(0.1)
-                                : user.isTerminated
-                                    ? Colors.orange.withOpacity(0.1)
-                                    : Colors.green.withOpacity(0.1),
-                            border: Border.all(
-                              color: user.isDisconnected
-                                  ? Colors.red
-                                  : user.isTerminated
-                                      ? Colors.orange
-                                      : Colors.green,
-                            ),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          padding: const EdgeInsets.all(5),
-                          child: Text(
-                            user.isDisconnected
-                                ? 'Disconnected'
-                                : user.isTerminated
-                                    ? 'Terminated'
-                                    : 'Connected',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: _fontSize,
-                              color: user.isDisconnected
-                                  ? Colors.red
-                                  : user.isTerminated
-                                      ? Colors.orange
-                                      : Colors.green,
-                            ),
-                          ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: DataTable(
+              columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
+              columns: [
+                DataColumn(label: Text('Name', style: TextStyle(fontSize: _fontSize))),
+                DataColumn(label: Text('IP', style: TextStyle(fontSize: _fontSize))),
+                DataColumn(label: Text('NAS', style: TextStyle(fontSize: _fontSize))),
+                DataColumn(label: Text('MAC', style: TextStyle(fontSize: _fontSize))),
+                DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: _fontSize))),
+                DataColumn(label: Text('Status', style: TextStyle(fontSize: _fontSize))),
+              ],
+              rows: _filteredUsers.take(10).map((user) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(user.name, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(user.ip, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(user.nas, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(user.macAdd, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(user.createdAtString, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Container(
+                      width: 110,
+                      decoration: BoxDecoration(
+                        color: user.isDisconnected
+                            ? Colors.red.withOpacity(0.1)
+                            : user.isTerminated
+                                ? Colors.orange.withOpacity(0.1)
+                                : Colors.green.withOpacity(0.1),
+                        border: Border.all(
+                          color: user.isDisconnected
+                              ? Colors.red
+                              : user.isTerminated
+                                  ? Colors.orange
+                                  : Colors.green,
                         ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.all(5),
+                      child: Text(
+                        user.isDisconnected
+                            ? 'Disconnected'
+                            : user.isTerminated
+                                ? 'Terminated'
+                                : 'Connected',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: _fontSize,
+                          color: user.isDisconnected
+                              ? Colors.red
+                              : user.isTerminated
+                                  ? Colors.orange
+                                  : Colors.green,
+                        ),
+                      ),
+                    )),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         ),
       ],
