@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:radius_db_ui/components/user_data_search.dart';
-import '../data/data_service.dart';
-import '../user_data.dart';
+import 'package:radius_db_ui/user_data.dart';
+import '../services/api_service.dart'; // API service for subscriptions
+import '../classes/subscription_class.dart'; // Models
 import '../components/pagination.dart';
 import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key});
+  const SubscriptionsView({super.key, required List<Subscription> subscriptions});
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
 }
 
 class _SubscriptionsViewState extends State<SubscriptionsView> {
-  late Future<List<UserData>> _futureUserData;
-  List<UserData> _users = [];
-  List<UserData> _filteredUsers = [];
+  late Future<List<Subscription>> _futureSubscriptions;
+  List<Subscription> _subscriptions = [];
+  List<Subscription> _filteredSubscriptions = [];
   final int _rowsPerPage = 10;
   int _currentPage = 0;
   int _totalPages = 0;
@@ -26,7 +27,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   @override
   void initState() {
     super.initState();
-    _futureUserData = parseUserData();
+    _futureSubscriptions = fetchSubscriptions();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -38,21 +39,21 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   }
 
   void _onSearchChanged() {
-    List<UserData> filteredList = searchUserData(_users, _searchController.text);
+    List<Subscription> filteredList = searchSubscriptions(_subscriptions, _searchController.text);
 
     if (_selectedFilter == 'Terminated') {
-      filteredList = filteredList.where((user) => user.isTerminated && !user.isDisconnected).toList();
+      filteredList = filteredList.where((subscription) => subscription.isTerminated && !subscription.isDisconnected).toList();
     } else if (_selectedFilter == 'Disconnected') {
-      filteredList = filteredList.where((user) => !user.isTerminated && user.isDisconnected).toList();
+      filteredList = filteredList.where((subscription) => !subscription.isTerminated && subscription.isDisconnected).toList();
     } else if (_selectedFilter == 'Newest') {
       filteredList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    }  else if (_selectedFilter == 'Connected') {
-      filteredList = filteredList.where((user) => !user.isTerminated && !user.isDisconnected).toList();
+    } else if (_selectedFilter == 'Connected') {
+      filteredList = filteredList.where((subscription) => !subscription.isTerminated && !subscription.isDisconnected).toList();
     }
 
     setState(() {
-      _filteredUsers = filteredList;
-      _totalPages = (_filteredUsers.length / _rowsPerPage).ceil();
+      _filteredSubscriptions = filteredList;
+      _totalPages = (_filteredSubscriptions.length / _rowsPerPage).ceil();
       _currentPage = 0;
     });
   }
@@ -64,23 +65,34 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     final double titleFontSize = screenWidth > 600 ? 16 : 12;
     final double filterWidth = screenWidth > 600 ? 150 : 100;
 
-    return FutureBuilder<List<UserData>>(
-      future: _futureUserData,
+    return FutureBuilder<List<Subscription>>(
+      future: _futureSubscriptions,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          _users = snapshot.data!;
-          _filteredUsers = _filteredUsers.isEmpty && _searchController.text.isEmpty ? _users : _filteredUsers;
-          _totalPages = (_filteredUsers.length / _rowsPerPage).ceil();
+          _subscriptions = snapshot.data ?? [];
+          print(_subscriptions);
+          if (_searchController.text.isEmpty && _selectedFilter == null) {
+            _filteredSubscriptions = _subscriptions;
+          }
+          _totalPages = (_filteredSubscriptions.isEmpty ? 1 : (_filteredSubscriptions.length / _rowsPerPage).ceil());
+
+          // Ensure current page is within valid range
+          if (_currentPage >= _totalPages) {
+            _currentPage = _totalPages - 1;
+          }
+          if (_currentPage < 0) {
+            _currentPage = 0;
+          }
 
           final startIndex = _currentPage * _rowsPerPage;
           final endIndex = (_currentPage + 1) * _rowsPerPage;
-          final List<UserData> pageItems = _filteredUsers.sublist(
+          final List<Subscription> pageItems = _filteredSubscriptions.sublist(
             startIndex,
-            endIndex > _filteredUsers.length ? _filteredUsers.length : endIndex,
+            endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex,
           );
 
           return Column(
@@ -136,26 +148,26 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                       DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize))),
                       DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize))),
                     ],
-                    rows: pageItems.map((user) {
+                    rows: pageItems.map((subscription) {
                       return DataRow(
                         cells: [
-                          DataCell(Text(user.name, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(user.ip, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(user.nas, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(user.macAdd, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(user.planName, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: fontSize))),
+                          DataCell(Text(subscription.plan.name, style: TextStyle(fontSize: fontSize))),
                           DataCell(Container(
                             width: 110,
                             decoration: BoxDecoration(
-                              color: user.isDisconnected
+                              color: subscription.isDisconnected
                                   ? Colors.red.withOpacity(0.1)
-                                  : user.isTerminated
+                                  : subscription.isTerminated
                                       ? Colors.orange.withOpacity(0.1)
                                       : Colors.green.withOpacity(0.1),
                               border: Border.all(
-                                color: user.isDisconnected
+                                color: subscription.isDisconnected
                                     ? Colors.red
-                                    : user.isTerminated
+                                    : subscription.isTerminated
                                         ? Colors.orange
                                         : Colors.green,
                               ),
@@ -163,17 +175,17 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                             ),
                             padding: const EdgeInsets.all(5),
                             child: Text(
-                              user.isDisconnected
+                              subscription.isDisconnected
                                   ? 'Disconnected'
-                                  : user.isTerminated
+                                  : subscription.isTerminated
                                       ? 'Terminated'
                                       : 'Connected',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: fontSize,
-                                color: user.isDisconnected
+                                color: subscription.isDisconnected
                                     ? Colors.red
-                                    : user.isTerminated
+                                    : subscription.isTerminated
                                         ? Colors.orange
                                         : Colors.green,
                               ),
@@ -185,35 +197,37 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        'Showing data ${startIndex + 1} to $endIndex of ${_filteredUsers.length} entries',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+              if (_filteredSubscriptions.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    CustomPagination(
-                      totalPage: _totalPages,
-                      currentPage: _currentPage,
-                      onPageChange: (number) {
-                        setState(() {
-                          _currentPage = number;
-                        });
-                      },
-                      show: 4,
-                      fontSize: fontSize,
-                    ),
-                  ],
+                      if (_totalPages > 1)
+                        CustomPagination(
+                          totalPage: _totalPages,
+                          currentPage: _currentPage,
+                          onPageChange: (number) {
+                            setState(() {
+                              _currentPage = number;
+                            });
+                          },
+                          show: 4,
+                          fontSize: fontSize,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           );
         } else {
@@ -223,3 +237,5 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     );
   }
 }
+
+

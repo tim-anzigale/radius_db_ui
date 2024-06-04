@@ -1,51 +1,52 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:radius_db_ui/components/view_all.dart';
-import '../data/data_service.dart';
-import '../user_data.dart';
+import 'package:radius_db_ui/user_data.dart';
+import '../services/api_service.dart'; // Import api_service.dart
+import '../classes/subscription_class.dart';
 import '../Pages/view_all_page.dart';
 
 class RecentSubscriptionsView extends StatefulWidget {
-  const RecentSubscriptionsView({super.key, required this.userDataList});
-
-  final List<UserData> userDataList;
+  const RecentSubscriptionsView({super.key, required List<UserData> userDataList});
 
   @override
   _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
 }
 
 class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
-  late Future<List<UserData>> _futureUserData;
-  List<UserData> _users = [];
-  List<UserData> _filteredUsers = []; // Filtered list based on date
+  late Future<List<Subscription>> _futureSubscriptions;
+  List<Subscription> _subscriptions = [];
+  List<Subscription> _recentSubscriptions = []; // Filtered list based on date
   double _fontSize = 16; // Initial font size
 
   @override
   void initState() {
     super.initState();
-    _futureUserData = parseUserData(); // Fetch user data from your data service
+    _futureSubscriptions = fetchSubscriptions(); // Fetch subscriptions from API
   }
 
-  void _filterRecentUsers() {
+  void _filterRecentSubscriptions() {
     final DateTime now = DateTime.now();
     final DateTime cutoffDate = now.subtract(const Duration(days: 30));
 
-    _filteredUsers = _users.where((user) {
-      return user.createdAt.isAfter(cutoffDate);
-    }).toList();
+    _recentSubscriptions = _subscriptions.where((subscriptions) => subscriptions.createdAt.isAfter(cutoffDate)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<UserData>>(
-      future: _futureUserData,
+    return FutureBuilder<List<Subscription>>(
+      future: _futureSubscriptions,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          _users = snapshot.data!;
-          _filterRecentUsers();
+          _subscriptions = snapshot.data!;
+          _filterRecentSubscriptions();
+          if (kDebugMode) {
+            print(_recentSubscriptions);
+          } 
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -82,7 +83,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
             ViewAllText(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ViewAllSubscriptionsPage(userDataList: _users),
+                  builder: (context) => const ViewAllSubscriptionsPage(userDataList: []),
                 ));
               },
             ),
@@ -101,26 +102,26 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                 DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: _fontSize))),
                 DataColumn(label: Text('Status', style: TextStyle(fontSize: _fontSize))),
               ],
-              rows: _filteredUsers.take(10).map((user) {
+              rows: _recentSubscriptions.take(10).map((subscription) {
                 return DataRow(
                   cells: [
-                    DataCell(Text(user.name, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(user.ip, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(user.nas, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(user.macAdd, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(user.createdAtString, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(subscription.name, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: _fontSize))),
+                    DataCell(Text(subscription.createdAt as String, style: TextStyle(fontSize: _fontSize))),
                     DataCell(Container(
                       width: 110,
                       decoration: BoxDecoration(
-                        color: user.isDisconnected
+                        color: subscription.isDisconnected
                             ? Colors.red.withOpacity(0.1)
-                            : user.isTerminated
+                            : subscription.isTerminated
                                 ? Colors.orange.withOpacity(0.1)
                                 : Colors.green.withOpacity(0.1),
                         border: Border.all(
-                          color: user.isDisconnected
+                          color: subscription.isDisconnected
                               ? Colors.red
-                              : user.isTerminated
+                              : subscription.isTerminated
                                   ? Colors.orange
                                   : Colors.green,
                         ),
@@ -128,17 +129,17 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                       ),
                       padding: const EdgeInsets.all(5),
                       child: Text(
-                        user.isDisconnected
+                        subscription.isDisconnected
                             ? 'Disconnected'
-                            : user.isTerminated
+                            : subscription.isTerminated
                                 ? 'Terminated'
                                 : 'Connected',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: _fontSize,
-                          color: user.isDisconnected
+                          color: subscription.isDisconnected
                               ? Colors.red
-                              : user.isTerminated
+                              : subscription.isTerminated
                                   ? Colors.orange
                                   : Colors.green,
                         ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:radius_db_ui/components/user_stats_gridview.dart';
 import '../user_data.dart';
-import '../data/data_service.dart';
+import '../services/data_service.dart';
 import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 

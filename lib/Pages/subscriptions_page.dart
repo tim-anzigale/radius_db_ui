@@ -45,13 +45,13 @@ class SubscriptionsPage extends StatelessWidget {
         ? DarkFlatNeumorphismDesign(
             child: const Padding(
               padding: EdgeInsets.all(16.0),
-              child: SubscriptionsView(),
+              child: SubscriptionsView(subscriptions: [],),
             ),
           )
         : FlatNeumorphismDesign(
             child: const Padding(
               padding: EdgeInsets.all(16.0),
-              child: SubscriptionsView(),
+              child: SubscriptionsView(subscriptions: [],),
             ),
           );
   }

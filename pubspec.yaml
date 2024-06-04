@@ -36,6 +36,7 @@ dependencies:
   flutter_screenutil: ^5.8.4
   fl_chart: ^0.68.0
   provider: ^6.0.0
+  pager: ^0.0.6
  
   
 

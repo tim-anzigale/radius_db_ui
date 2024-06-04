@@ -6,7 +6,7 @@ import '../user_data.dart';
 class PieChartWidget extends StatelessWidget {
   final List<UserData> userDataList;
 
-  const PieChartWidget({Key? key, required this.userDataList}) : super(key: key);
+  const PieChartWidget({super.key, required this.userDataList});
 
   @override
   Widget build(BuildContext context) {
@@ -58,3 +58,4 @@ class PieChartWidget extends StatelessWidget {
     );
   }
 }
+
