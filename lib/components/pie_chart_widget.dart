@@ -1,30 +1,31 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../user_data.dart';
+import 'package:radius_db_ui/classes/subscription_class.dart';
+
 
 class PieChartWidget extends StatelessWidget {
-  final List<UserData> userDataList;
+  final List<Subscription> subscriptions;
 
-  const PieChartWidget({super.key, required this.userDataList});
+  const PieChartWidget({super.key, required this.subscriptions});
 
   @override
   Widget build(BuildContext context) {
-    int connectedCount = userDataList.where((userData) => !userData.isDisconnected && !userData.isTerminated).length;
-    int disconnectedCount = userDataList.where((userData) => userData.isDisconnected).length;
-    int terminatedCount = userDataList.where((userData) => userData.isTerminated).length;
+    int connectedCount = subscriptions.where((subscription) => !subscription.isDisconnected && !subscription.isTerminated).length;
+    int disconnectedCount = subscriptions.where((subscription) => subscription.isDisconnected).length;
+    int terminatedCount = subscriptions.where((subscription) => subscription.isTerminated).length;
 
     if (kDebugMode) {
-      print('UserDataList Length: ${userDataList.length}');
+      print('Subscriptions Length: ${subscriptions.length}');
     }
     print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');
 
-    if (userDataList.isEmpty) {
-      return const Center(child: Text(''));
+    if (subscriptions.isEmpty) {
+      return const Center(child: Text('No data available'));
     }
 
-    userDataList.forEach((userData) {
-      print('User: ${userData.name}, IP: ${userData.ip}, Plan: ${userData.planName}');
+    subscriptions.forEach((subscription) {
+      print('Subscription: ${subscription.name}, IP: ${subscription.lastCon.ip}, Plan: ${subscription.plan.name}');
     });
 
     return PieChart(
@@ -58,4 +59,3 @@ class PieChartWidget extends StatelessWidget {
     );
   }
 }
-

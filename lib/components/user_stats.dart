@@ -1,48 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:radius_db_ui/components/user_stats_gridview.dart';
-import '../user_data.dart';
-import '../services/data_service.dart';
+import '../classes/subscription_class.dart';
+import '../services/api_service.dart'; // Import the updated api_service.dart
 import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 
 class UserStats extends StatefulWidget {
-  const UserStats({super.key, required this.userDataList});
+  const UserStats({super.key, required this.subscriptions});
 
-  final List<UserData> userDataList;
+  final List<Subscription> subscriptions;
 
   @override
   _UserStatsState createState() => _UserStatsState();
 }
 
 class _UserStatsState extends State<UserStats> {
-  late Future<List<UserData>> _futureUserData;
+  late Future<List<Subscription>> _futureSubscriptions;
+  List<Subscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
-    _futureUserData = parseUserData();
+    _futureSubscriptions = fetchSubscriptions(); // Fetch subscriptions from API
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<UserData>>(
-      future: _futureUserData,
+    return FutureBuilder<List<Subscription>>(
+      future: _futureSubscriptions,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
         } else if (snapshot.hasData) {
-          List<UserData> userDataList = snapshot.data!;
+          _subscriptions = snapshot.data!;
           return Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: UserStatsCardGridView(userDataList: userDataList),
+            child: UserStatsCardGridView(subscriptions: _subscriptions),
           );
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: Text('No data available'));
         }
       },
     );

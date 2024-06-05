@@ -8,7 +8,7 @@ import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key, required List<Subscription> subscriptions});
+  const SubscriptionsView({super.key, required List<Subscription> subscriptions, });
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();

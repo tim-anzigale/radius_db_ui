@@ -1,11 +1,11 @@
- import 'package:flutter/material.dart';
-import '../user_data.dart';
+import 'package:flutter/material.dart';
+import '../classes/subscription_class.dart';
 import '../components/user_stats.dart';
 
 class UserStatsCardGridView extends StatelessWidget {
-  const UserStatsCardGridView({Key? key, required this.userDataList}) : super(key: key);
+  const UserStatsCardGridView({Key? key, required this.subscriptions}) : super(key: key);
 
-  final List<UserData> userDataList;
+  final List<Subscription> subscriptions;
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +22,13 @@ class UserStatsCardGridView extends StatelessWidget {
       childAspectRatio = 1.6; // Mobile screens
     }
 
-    final totalSubscriptions = userDataList.length;
-    final recentSubscriptions = userDataList.where((user) {
+    final totalSubscriptions = subscriptions.length;
+    final recentSubscriptions = subscriptions.where((subscription) {
       final currentDate = DateTime.now();
-      return currentDate.difference(user.createdAt).inDays <= 30;
+      return currentDate.difference(subscription.createdAt).inDays <= 30;
     }).length;
-    final activeSubscriptions = userDataList.where((user) => !user.isTerminated).length;
-    final terminatedSubscriptions = userDataList.where((user) => user.isTerminated).length;
+    final activeSubscriptions = subscriptions.where((subscription) => !subscription.isTerminated).length;
+    final terminatedSubscriptions = subscriptions.where((subscription) => subscription.isTerminated).length;
 
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),

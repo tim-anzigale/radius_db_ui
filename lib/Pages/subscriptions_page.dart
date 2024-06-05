@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../user_data.dart';
-import '../components/user_stats.dart';
+import '../classes/subscription_class.dart';
 import '../components/subscription_view.dart';
 import '../navigation_drawer.dart';
 import '../components/header.dart';
 import '../components/neumorphic.dart'; 
-import '../theme_provider.dart';  // Import your theme provider
+import '../theme_provider.dart'; // Import your theme provider
 
 class SubscriptionsPage extends StatelessWidget {
-  final List<UserData> userDataList;
+  final List<Subscription> subscriptions;
 
-  const SubscriptionsPage({super.key, required this.userDataList});
+  const SubscriptionsPage({super.key, required this.subscriptions});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +26,6 @@ class SubscriptionsPage extends StatelessWidget {
         child: Column(
           children: [
             const CustomHeader(),
-            //const SizedBox(height: 20),
-           // UserStats(userDataList: userDataList),
             const SizedBox(height: 20),
             _buildSubscriptionsContainer(context),
           ],
@@ -43,15 +40,15 @@ class SubscriptionsPage extends StatelessWidget {
 
     return isDarkMode
         ? DarkFlatNeumorphismDesign(
-            child: const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: SubscriptionsView(subscriptions: [],),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SubscriptionsView(subscriptions: subscriptions),
             ),
           )
         : FlatNeumorphismDesign(
-            child: const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: SubscriptionsView(subscriptions: [],),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SubscriptionsView(subscriptions: subscriptions),
             ),
           );
   }

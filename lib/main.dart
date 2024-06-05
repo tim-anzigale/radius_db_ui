@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:radius_db_ui/Pages/view_all_page.dart';
+import 'package:radius_db_ui/classes/subscription_class.dart';
 
-import './pages/home_screen.dart'; // Import your HomeScreen
-import './pages/subscriptions_page.dart'; // Import SubscriptionsPage
-import './pages/settings.dart'; // Import the settings page
-import 'user_data.dart'; // Import your user data class
-import 'theme_provider.dart'; // Import the theme provider
-import './Theme/theme_manager.dart'; // Import the theme manager
+import './pages/home_screen.dart';
+import './pages/subscriptions_page.dart';
+import './pages/settings.dart';
+import 'services/api_service.dart';
+import 'theme_provider.dart';
+import './Theme/theme_manager.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Fetch subscription data
+  List<Subscription> subscriptions = await fetchSubscriptions();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: const MyApp(),
+      child: MyApp(subscriptions: subscriptions),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final List<Subscription> subscriptions;
+
+  const MyApp({Key? key, required this.subscriptions}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Assume you have a list of user data available
-    final List<UserData> userDataList = []; // Replace with your user data loading logic
-
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
@@ -35,8 +41,9 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeManager.buildDarkTheme(),
       initialRoute: '/home',
       routes: {
-        '/home': (context) => HomeScreen(userDataList: userDataList),
-        '/subscriptions': (context) => SubscriptionsPage(userDataList: userDataList),
+        '/home': (context) => HomeScreen(subscriptions: subscriptions),
+        '/subscriptions': (context) => SubscriptionsPage(subscriptions: subscriptions),
+        '/view_all_subscriptions': (context) => ViewAllSubscriptionsPage(subscriptions: subscriptions),
         '/settings': (context) => const SettingsPage(),
       },
     );

@@ -1,70 +1,43 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:radius_db_ui/components/view_all.dart';
-import 'package:radius_db_ui/user_data.dart';
-import '../services/api_service.dart'; // Import api_service.dart
-import '../classes/subscription_class.dart';
-import '../Pages/view_all_page.dart';
+import 'package:radius_db_ui/Pages/view_all_page.dart';
+import 'package:radius_db_ui/classes/subscription_class.dart';
+
+
 
 class RecentSubscriptionsView extends StatefulWidget {
-  const RecentSubscriptionsView({super.key, required List<UserData> userDataList});
+  const RecentSubscriptionsView({super.key, required this.subscriptions});
+
+  final List<Subscription> subscriptions;
 
   @override
   _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
 }
 
 class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
-  late Future<List<Subscription>> _futureSubscriptions;
-  List<Subscription> _subscriptions = [];
-  List<Subscription> _recentSubscriptions = []; // Filtered list based on date
-  double _fontSize = 16; // Initial font size
+  List<Subscription> _recentSubscriptions = [];
 
   @override
   void initState() {
     super.initState();
-    _futureSubscriptions = fetchSubscriptions(); // Fetch subscriptions from API
+    _filterRecentSubscriptions();
   }
 
   void _filterRecentSubscriptions() {
     final DateTime now = DateTime.now();
     final DateTime cutoffDate = now.subtract(const Duration(days: 30));
-
-    _recentSubscriptions = _subscriptions.where((subscriptions) => subscriptions.createdAt.isAfter(cutoffDate)).toList();
+    _recentSubscriptions = widget.subscriptions.where((subscription) => subscription.createdAt.isAfter(cutoffDate)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Subscription>>(
-      future: _futureSubscriptions,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          _subscriptions = snapshot.data!;
-          _filterRecentSubscriptions();
-          if (kDebugMode) {
-            print(_recentSubscriptions);
-          } 
-
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              // Recalculate font size based on screen width
-              _fontSize = constraints.maxWidth > 600 ? 13 : 10;
-              return _buildRecentSubscriptions(context);
-            },
-          );
-        } else {
-          return const Center(child: Text('No data available'));
-        }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _buildRecentSubscriptions(context, constraints.maxWidth);
       },
     );
   }
 
-  Widget _buildRecentSubscriptions(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
+  Widget _buildRecentSubscriptions(BuildContext context, double screenWidth) {
     return Column(
       children: [
         Row(
@@ -75,80 +48,81 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               child: Text(
                 'Recent Subscriptions',
                 style: TextStyle(
-                  fontSize: _fontSize + 4,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            ViewAllText(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const ViewAllSubscriptionsPage(userDataList: []),
-                ));
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ViewAllSubscriptionsPage(subscriptions: widget.subscriptions),
+                  ),
+                );
               },
+              child: const Text('View All'),
             ),
           ],
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: DataTable(
-              columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
-              columns: [
-                DataColumn(label: Text('Name', style: TextStyle(fontSize: _fontSize))),
-                DataColumn(label: Text('IP', style: TextStyle(fontSize: _fontSize))),
-                DataColumn(label: Text('NAS', style: TextStyle(fontSize: _fontSize))),
-                DataColumn(label: Text('MAC', style: TextStyle(fontSize: _fontSize))),
-                DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: _fontSize))),
-                DataColumn(label: Text('Status', style: TextStyle(fontSize: _fontSize))),
-              ],
-              rows: _recentSubscriptions.take(10).map((subscription) {
-                return DataRow(
-                  cells: [
-                    DataCell(Text(subscription.name, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Text(subscription.createdAt as String, style: TextStyle(fontSize: _fontSize))),
-                    DataCell(Container(
-                      width: 110,
-                      decoration: BoxDecoration(
+          child: DataTable(
+            columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
+            columns: const [
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('IP')),
+              DataColumn(label: Text('NAS')),
+              DataColumn(label: Text('MAC')),
+              DataColumn(label: Text('Connection Date')),
+              DataColumn(label: Text('Status')),
+            ],
+            rows: _recentSubscriptions.map((subscription) {
+              return DataRow(
+                cells: [
+                  DataCell(Text(subscription.name)),
+                  DataCell(Text(subscription.lastCon.ip)),
+                  DataCell(Text(subscription.lastCon.nas)),
+                  DataCell(Text(subscription.macAdd)),
+                  DataCell(Text(subscription.createdAt.toString())), // Format the DateTime to a String
+                  DataCell(Container(
+                    width: 110,
+                    decoration: BoxDecoration(
+                      color: subscription.isDisconnected
+                          ? Colors.red.withOpacity(0.1)
+                          : subscription.isTerminated
+                              ? Colors.orange.withOpacity(0.1)
+                              : Colors.green.withOpacity(0.1),
+                      border: Border.all(
                         color: subscription.isDisconnected
-                            ? Colors.red.withOpacity(0.1)
+                            ? Colors.red
                             : subscription.isTerminated
-                                ? Colors.orange.withOpacity(0.1)
-                                : Colors.green.withOpacity(0.1),
-                        border: Border.all(
-                          color: subscription.isDisconnected
-                              ? Colors.red
-                              : subscription.isTerminated
-                                  ? Colors.orange
-                                  : Colors.green,
-                        ),
-                        borderRadius: BorderRadius.circular(5),
+                                ? Colors.orange
+                                : Colors.green,
                       ),
-                      padding: const EdgeInsets.all(5),
-                      child: Text(
-                        subscription.isDisconnected
-                            ? 'Disconnected'
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: const EdgeInsets.all(5),
+                    child: Text(
+                      subscription.isDisconnected
+                          ? 'Disconnected'
+                          : subscription.isTerminated
+                              ? 'Terminated'
+                              : 'Connected',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: subscription.isDisconnected
+                            ? Colors.red
                             : subscription.isTerminated
-                                ? 'Terminated'
-                                : 'Connected',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: _fontSize,
-                          color: subscription.isDisconnected
-                              ? Colors.red
-                              : subscription.isTerminated
-                                  ? Colors.orange
-                                  : Colors.green,
-                        ),
+                                ? Colors.orange
+                                : Colors.green,
                       ),
-                    )),
-                  ],
-                );
-              }).toList(),
-            ),
+                    ),
+                  )),
+                ],
+              );
+            }).toList(),
           ),
         ),
       ],
