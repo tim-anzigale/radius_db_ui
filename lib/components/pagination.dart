@@ -19,8 +19,10 @@ class CustomPagination extends StatelessWidget {
     this.fontSize = 14.0,
   });
 
-  @override
+ @override
   Widget build(BuildContext context) {
+    if (totalPage <= 0) return const SizedBox(); // Handle cases where there are no pages
+
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
 
@@ -31,8 +33,18 @@ class CustomPagination extends StatelessWidget {
       paginationItems.add(_buildArrowButton(Icons.keyboard_arrow_left, currentPage - 1, isDarkMode));
     }
 
-    int startPage = (currentPage - show ~/ 2).clamp(0, totalPage - show);
-    int endPage = (startPage + show).clamp(0, totalPage);
+    // Handle cases where totalPage is less than show
+    int startPage = 0;
+    int endPage = totalPage;
+    if (totalPage < show) {
+      // Show all pages if totalPage is less than show
+      startPage = 0;
+      endPage = totalPage;
+    } else {
+      // Calculate start and end pages considering show
+      startPage = (currentPage - show ~/ 2).clamp(0, totalPage - show);
+      endPage = (startPage + show).clamp(0, totalPage);
+    }
 
     if (startPage > 0) {
       paginationItems.add(_buildPageItem(0, context, isDarkMode));
@@ -70,7 +82,11 @@ class CustomPagination extends StatelessWidget {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => onPageChange(pageIndex),
+        onTap: () {
+          if (pageIndex >= 0 && pageIndex < totalPage) {
+            onPageChange(pageIndex);
+          }
+        },
         child: Container(
           width: 30.0,
           height: 30.0,
@@ -93,7 +109,11 @@ class CustomPagination extends StatelessWidget {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => onPageChange(pageIndex),
+        onTap: () {
+          if (pageIndex >= 0 && pageIndex < totalPage) {
+            onPageChange(pageIndex);
+          }
+        },
         child: Container(
           width: 30.0,
           height: 30.0,

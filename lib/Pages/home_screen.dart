@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:radius_db_ui/classes/subscription_class.dart';
 import 'package:radius_db_ui/components/pie_chart_widget.dart';
 import 'package:radius_db_ui/components/user_stats.dart';
 import '../components/header.dart';
 import '../components/recent_subscriptions_view.dart';
 import '../components/top_plans_view.dart';
 import '../navigation_drawer.dart';
-import '../user_data.dart';
 import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 
-class HomeScreen extends StatelessWidget {
-  final List<UserData> userDataList;
+class HomeScreen extends StatefulWidget {
+  final List<Subscription> subscriptions;
 
-  const HomeScreen({Key? key, required this.userDataList}) : super(key: key);
+  const HomeScreen({Key? key, required this.subscriptions}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    printUserInfo(); // Print user info for debugging purposes
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       drawer: const SideMenu(),
       appBar: AppBar(
@@ -31,30 +34,22 @@ class HomeScreen extends StatelessWidget {
           children: [
             const CustomHeader(),
             const SizedBox(height: 20),
-            UserStats(userDataList: userDataList),
+            UserStats(subscriptions: widget.subscriptions),
             const SizedBox(height: 20),
             _buildNeumorphismContainer(
               context,
-              RecentSubscriptionsView(userDataList: userDataList),
+              RecentSubscriptionsView(subscriptions: widget.subscriptions),
             ),
             const SizedBox(height: 20),
-            _buildGridSection(context),
+            _buildGridSection(context, widget.subscriptions),
           ],
         ),
       ),
     );
   }
 
-  // Helper function to print user information for debugging
-  void printUserInfo() {
-    print('UserDataList Length: ${userDataList.length}');
-    for (var user in userDataList) {
-      print('User: ${user.name}, Disconnected: ${user.isDisconnected}, Terminated: ${user.isTerminated}');
-    }
-  }
-
   // Helper function to build the grid section
-  Widget _buildGridSection(BuildContext context) {
+  Widget _buildGridSection(BuildContext context, List<Subscription> subscriptions) {
     final bool isWideScreen = MediaQuery.of(context).size.width >= 800;
     final int crossAxisCount = isWideScreen ? 2 : 1;
 
@@ -68,11 +63,11 @@ class HomeScreen extends StatelessWidget {
       children: [
         _buildNeumorphismContainer(
           context,
-          TopPlansView(userDataList: userDataList),
+          TopPlansView(subscriptions: subscriptions),
         ),
         _buildNeumorphismContainer(
           context,
-          PieChartWidget(userDataList: userDataList),
+          PieChartWidget(subscriptions: subscriptions),
         ),
       ],
     );
