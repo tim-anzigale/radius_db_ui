@@ -52,7 +52,7 @@ class _TopPlansViewState extends State<TopPlansView> {
 
   Widget _buildTitleSection(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
