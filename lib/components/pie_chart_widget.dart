@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:radius_db_ui/classes/subscription_class.dart';
 
-
 class PieChartWidget extends StatelessWidget {
   final List<Subscription> subscriptions;
 
@@ -28,34 +27,79 @@ class PieChartWidget extends StatelessWidget {
       print('Subscription: ${subscription.name}, IP: ${subscription.lastCon.ip}, Plan: ${subscription.plan.name}');
     });
 
-    return PieChart(
-      PieChartData(
-        sections: [
-          PieChartSectionData(
-            color: Colors.green,
-            value: connectedCount.toDouble(),
-            title: 'Connected\n$connectedCount',
-            radius: 50,
-            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0), // Add padding to the title
+          child: Text(
+            'Subscription Status',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          PieChartSectionData(
-            color: Colors.red,
-            value: disconnectedCount.toDouble(),
-            title: 'Disconnected\n$disconnectedCount',
-            radius: 50,
-            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 200, // Set a specific height for the pie chart
+          child: PieChart(
+            PieChartData(
+              sections: [
+                PieChartSectionData(
+                  color: Colors.green,
+                  value: connectedCount.toDouble(),
+                  title: '$connectedCount',
+                  radius: 50,
+                  titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                PieChartSectionData(
+                  color: Colors.red,
+                  value: disconnectedCount.toDouble(),
+                  title: '$disconnectedCount',
+                  radius: 50,
+                  titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                PieChartSectionData(
+                  color: Colors.grey,
+                  value: terminatedCount.toDouble(),
+                  title: '$terminatedCount',
+                  radius: 50,
+                  titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+            ),
           ),
-          PieChartSectionData(
-            color: Colors.grey,
-            value: terminatedCount.toDouble(),
-            title: 'Terminated\n$terminatedCount',
-            radius: 50,
-            titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ],
-        sectionsSpace: 2,
-        centerSpaceRadius: 40,
-      ),
+        ),
+        const SizedBox(height: 16),
+        _buildLegend(),
+      ],
+    );
+  }
+
+  Widget _buildLegend() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildLegendItem(color: Colors.green, text: 'Connected'),
+        const SizedBox(width: 16),
+        _buildLegendItem(color: Colors.red, text: 'Disconnected'),
+        const SizedBox(width: 16),
+        _buildLegendItem(color: Colors.grey, text: 'Terminated'),
+      ],
+    );
+  }
+
+  Widget _buildLegendItem({required Color color, required String text}) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Text(text),
+      ],
     );
   }
 }

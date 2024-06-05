@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: crossAxisCount,
-      childAspectRatio: 1.0,
+      childAspectRatio: 1.5, // Adjust this value to reduce the height of the grid items
       mainAxisSpacing: 10.0,
       crossAxisSpacing: 16.0,
       children: [
