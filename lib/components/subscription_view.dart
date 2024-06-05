@@ -6,9 +6,12 @@ import '../classes/subscription_class.dart'; // Models
 import '../components/pagination.dart';
 import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
+import 'subscription_details_modal.dart'; // Import the modal widget
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key, required List<Subscription> subscriptions, });
+  const SubscriptionsView({super.key, required this.subscriptions});
+
+  final List<Subscription> subscriptions;
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
@@ -23,6 +26,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   int _totalPages = 0;
   final TextEditingController _searchController = TextEditingController();
   String? _selectedFilter;
+  bool _isAscending = true; // Track the sorting order
 
   @override
   void initState() {
@@ -58,6 +62,25 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     });
   }
 
+  void _sortByName() {
+    setState(() {
+      _isAscending = !_isAscending;
+      _filteredSubscriptions.sort((a, b) {
+        int result = a.name.compareTo(b.name);
+        return _isAscending ? result : -result;
+      });
+    });
+  }
+
+  void _showSubscriptionDetails(Subscription subscription) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SubscriptionDetailsModal(subscription: subscription);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -74,7 +97,6 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           _subscriptions = snapshot.data ?? [];
-          print(_subscriptions);
           if (_searchController.text.isEmpty && _selectedFilter == null) {
             _filteredSubscriptions = _subscriptions;
           }
@@ -139,9 +161,23 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 scrollDirection: Axis.horizontal,
                 child: SingleChildScrollView(
                   child: DataTable(
-                    columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
+                    columnSpacing: screenWidth * 0.075, // Adjust spacing between columns
+                    showCheckboxColumn: false, // Remove the checkboxes
                     columns: [
-                      DataColumn(label: Text('Name', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(
+                        label: InkWell(
+                          onTap: _sortByName,
+                          child: Row(
+                            children: [
+                              Text('Name', style: TextStyle(fontSize: fontSize)),
+                              Icon(
+                                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                                size: fontSize,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize))),
                       DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize))),
                       DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize))),
@@ -150,6 +186,11 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                     ],
                     rows: pageItems.map((subscription) {
                       return DataRow(
+                        onSelectChanged: (selected) {
+                          if (selected == true) {
+                            _showSubscriptionDetails(subscription);
+                          }
+                        },
                         cells: [
                           DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
                           DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
@@ -237,5 +278,3 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     );
   }
 }
-
-
