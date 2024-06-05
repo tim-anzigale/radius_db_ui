@@ -92,20 +92,21 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                   onTap: _sortByName,
                   child: Row(
                     children: [
-                      Text('Name', style: TextStyle(fontSize: fontSize)),
+                      Text('Name', style: TextStyle(fontSize: fontSize, color: Colors.grey)),
                       Icon(
                         _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
                         size: fontSize,
+                        color: Colors.grey,
                       ),
                     ],
                   ),
                 ),
               ),
-              DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize))),
-              DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize))),
-              DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize))),
-              DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: fontSize))),
-              DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize))),
+              DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
             ],
             rows: _recentSubscriptions.map((subscription) {
               return DataRow(
