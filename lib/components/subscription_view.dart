@@ -7,6 +7,7 @@ import '../components/pagination.dart';
 import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
 import 'subscription_details_modal.dart'; // Import the modal widget
+import '../services/export_service.dart'; // Import the export service
 
 class SubscriptionsView extends StatefulWidget {
   const SubscriptionsView({super.key, required this.subscriptions});
@@ -81,6 +82,24 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     );
   }
 
+  void _export(String format) async {
+    switch (format) {
+      case 'CSV':
+        await ExportService.exportToCSV(_filteredSubscriptions, 'subscriptions');
+        break;
+      case 'Excel':
+        await ExportService.exportToExcel(_filteredSubscriptions, 'subscriptions');
+        break;
+      case 'PDF':
+        await ExportService.exportToPDF(_filteredSubscriptions, 'subscriptions');
+        break;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$format Exported')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -135,24 +154,67 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        double availableWidth = constraints.maxWidth;
-                        double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
+                    child: Row(
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            double availableWidth = constraints.maxWidth;
+                            double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
 
-                        return custom.SearchBar(
-                          searchController: _searchController,
-                          selectedFilter: _selectedFilter,
-                          onFilterChanged: (String? newValue) {
-                            setState(() {
-                              _selectedFilter = newValue;
-                              _onSearchChanged();
+                            return custom.SearchBar(
+                              searchController: _searchController,
+                              selectedFilter: _selectedFilter,
+                              onFilterChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedFilter = newValue;
+                                  _onSearchChanged();
+                                });
+                              },
+                              filterWidth: adjustedFilterWidth,
+                              fontSize: fontSize,
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        IconButton(
+                          icon: const Icon(Icons.file_download),
+                          onPressed: () {
+                            final RenderBox button = context.findRenderObject() as RenderBox;
+                            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                            final RelativeRect position = RelativeRect.fromRect(
+                              Rect.fromPoints(
+                                button.localToGlobal(Offset.zero, ancestor: overlay),
+                                button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                              ),
+                              Offset.zero & overlay.size,
+                            );
+
+                            showMenu(
+                              context: context,
+                              position: position.shift(Offset(10, 0)), 
+                              items: [
+                                const PopupMenuItem(
+                                  value: 'CSV',
+                                  child: Text('Export as CSV'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'Excel',
+                                  child: Text('Export as Excel'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'PDF',
+                                  child: Text('Export as PDF'),
+                                ),
+                              ],
+                            ).then((value) {
+                              if (value != null) {
+                                _export(value);
+                              }
                             });
                           },
-                          filterWidth: adjustedFilterWidth,
-                          fontSize: fontSize,
-                        );
-                      },
+                          tooltip: 'Export',
+                        ),
+                      ],
                     ),
                   ),
                 ],

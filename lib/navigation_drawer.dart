@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './Pages/settings.dart'; // Import your settings page
-import './components/neumorphic.dart'; // Import the file containing FlatNeumorphismDesign
-import './theme_provider.dart'; // Import the theme provider
+import '../pages/settings.dart'; // Import your settings page
+import '../pages/profile_page.dart'; // Import the profile page
+import '../components/neumorphic.dart'; // Import the file containing FlatNeumorphismDesign
+import '../theme_provider.dart'; // Import the theme provider
 
 class SideMenu extends StatefulWidget {
   const SideMenu({Key? key}) : super(key: key);
@@ -94,9 +95,11 @@ class _SideMenuState extends State<SideMenu> {
                   color: isDarkMode ? Colors.grey[400] : Colors.grey, // Subtitle color based on theme
                 ),
               ),
-              trailing: Icon(Icons.keyboard_arrow_down, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
+              trailing: Icon(Icons.keyboard_arrow_right, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
               onTap: () {
-                // Handle profile tile tap
+                // Navigate to the profile page
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
               },
             ),
           ),
@@ -149,8 +152,8 @@ class _SideMenuState extends State<SideMenu> {
           icon: icon,
           text: text,
           isSelected: isSelected,
-          onTap: onTap, //const Color(0xFFE0E0E0)
-          hoverColor: isDarkMode ? const Color(0xFF403943) :  const Color(0xFF403943),
+          onTap: onTap,
+          hoverColor: isDarkMode ? const Color(0xFF403943) : const Color(0xFF403943),
           isDarkMode: isDarkMode,
         ),
       ),
@@ -184,7 +187,11 @@ class _HoverableListTileState extends State<_HoverableListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final Color? textColor = _isHovered ? Colors.white : (widget.isSelected ? Colors.blueGrey[800] : (widget.isDarkMode ? Colors.grey[200] : Colors.grey[800]));
+    final Color? textColor = _isHovered
+        ? Colors.white
+        : (widget.isSelected
+            ? Colors.blueGrey[800]
+            : (widget.isDarkMode ? Colors.grey[200] : Colors.grey[800]));
     return MouseRegion(
       onEnter: (_) {
         setState(() {
