@@ -78,7 +78,7 @@ flutter:
     - family: Ubuntu_Sans_Mono
       fonts:
         - asset: fonts/UbuntuSansMono-Regular.ttf
-        - asset: Roboto-Regular.ttf
+        
   assets:
     - assets/user_data.json
 
