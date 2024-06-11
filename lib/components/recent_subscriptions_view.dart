@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:radius_db_ui/Pages/view_all_page.dart';
 import 'package:radius_db_ui/classes/subscription_class.dart';
-
-
+import 'subscription_details_modal.dart'; // Import the modal widget
 
 class RecentSubscriptionsView extends StatefulWidget {
   const RecentSubscriptionsView({super.key, required this.subscriptions});
@@ -15,6 +14,7 @@ class RecentSubscriptionsView extends StatefulWidget {
 
 class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
   List<Subscription> _recentSubscriptions = [];
+  bool _isAscending = true; // Track the sorting order
 
   @override
   void initState() {
@@ -28,16 +28,31 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     _recentSubscriptions = widget.subscriptions.where((subscription) => subscription.createdAt.isAfter(cutoffDate)).toList();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return _buildRecentSubscriptions(context, constraints.maxWidth);
+  void _sortByName() {
+    setState(() {
+      _isAscending = !_isAscending;
+      _recentSubscriptions.sort((a, b) {
+        int result = a.name.compareTo(b.name);
+        return _isAscending ? result : -result;
+      });
+    });
+  }
+
+  void _showSubscriptionDetails(Subscription subscription) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SubscriptionDetailsModal(subscription: subscription);
       },
     );
   }
 
-  Widget _buildRecentSubscriptions(BuildContext context, double screenWidth) {
+  @override
+  Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double fontSize = screenWidth > 600 ? 13 : 10;
+    final double titleFontSize = screenWidth > 600 ? 16 : 12;
+
     return Column(
       children: [
         Row(
@@ -48,7 +63,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               child: Text(
                 'Recent Subscriptions',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -69,23 +84,43 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
-            columns: const [
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('IP')),
-              DataColumn(label: Text('NAS')),
-              DataColumn(label: Text('MAC')),
-              DataColumn(label: Text('Connection Date')),
-              DataColumn(label: Text('Status')),
+            columnSpacing: screenWidth * 0.075, // Adjust spacing between columns
+            showCheckboxColumn: false, // Remove the checkboxes
+            columns: [
+              DataColumn(
+                label: InkWell(
+                  onTap: _sortByName,
+                  child: Row(
+                    children: [
+                      Text('Name', style: TextStyle(fontSize: fontSize, color: Colors.grey)),
+                      Icon(
+                        _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: fontSize,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('Connection Date', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
             ],
             rows: _recentSubscriptions.map((subscription) {
               return DataRow(
+                onSelectChanged: (selected) {
+                  if (selected == true) {
+                    _showSubscriptionDetails(subscription);
+                  }
+                },
                 cells: [
-                  DataCell(Text(subscription.name)),
-                  DataCell(Text(subscription.lastCon.ip)),
-                  DataCell(Text(subscription.lastCon.nas)),
-                  DataCell(Text(subscription.macAdd)),
-                  DataCell(Text(subscription.createdAt.toString())), // Format the DateTime to a String
+                  DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
+                  DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
+                  DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: fontSize))),
+                  DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: fontSize))),
+                  DataCell(Text(subscription.createdAt.toString(), style: TextStyle(fontSize: fontSize))), // Format the DateTime to a String
                   DataCell(Container(
                     width: 110,
                     decoration: BoxDecoration(
@@ -112,6 +147,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                               : 'Connected',
                       textAlign: TextAlign.center,
                       style: TextStyle(
+                        fontSize: fontSize,
                         color: subscription.isDisconnected
                             ? Colors.red
                             : subscription.isTerminated

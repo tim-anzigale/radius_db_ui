@@ -6,9 +6,13 @@ import '../classes/subscription_class.dart'; // Models
 import '../components/pagination.dart';
 import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
+import 'subscription_details_modal.dart'; // Import the modal widget
+import '../services/export_service.dart'; // Import the export service
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key, required List<Subscription> subscriptions, });
+  const SubscriptionsView({super.key, required this.subscriptions});
+
+  final List<Subscription> subscriptions;
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
@@ -23,6 +27,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   int _totalPages = 0;
   final TextEditingController _searchController = TextEditingController();
   String? _selectedFilter;
+  bool _isAscending = true; // Track the sorting order
 
   @override
   void initState() {
@@ -58,6 +63,43 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     });
   }
 
+  void _sortByName() {
+    setState(() {
+      _isAscending = !_isAscending;
+      _filteredSubscriptions.sort((a, b) {
+        int result = a.name.compareTo(b.name);
+        return _isAscending ? result : -result;
+      });
+    });
+  }
+
+  void _showSubscriptionDetails(Subscription subscription) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SubscriptionDetailsModal(subscription: subscription);
+      },
+    );
+  }
+
+  void _export(String format) async {
+    switch (format) {
+      case 'CSV':
+        await ExportService.exportToCSV(_filteredSubscriptions, 'subscriptions');
+        break;
+      case 'Excel':
+        await ExportService.exportToExcel(_filteredSubscriptions, 'subscriptions');
+        break;
+      case 'PDF':
+        await ExportService.exportToPDF(_filteredSubscriptions, 'subscriptions');
+        break;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$format Exported')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -74,7 +116,6 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           _subscriptions = snapshot.data ?? [];
-          print(_subscriptions);
           if (_searchController.text.isEmpty && _selectedFilter == null) {
             _filteredSubscriptions = _subscriptions;
           }
@@ -113,24 +154,67 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        double availableWidth = constraints.maxWidth;
-                        double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
+                    child: Row(
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            double availableWidth = constraints.maxWidth;
+                            double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
 
-                        return custom.SearchBar(
-                          searchController: _searchController,
-                          selectedFilter: _selectedFilter,
-                          onFilterChanged: (String? newValue) {
-                            setState(() {
-                              _selectedFilter = newValue;
-                              _onSearchChanged();
+                            return custom.SearchBar(
+                              searchController: _searchController,
+                              selectedFilter: _selectedFilter,
+                              onFilterChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedFilter = newValue;
+                                  _onSearchChanged();
+                                });
+                              },
+                              filterWidth: adjustedFilterWidth,
+                              fontSize: fontSize,
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        IconButton(
+                          icon: const Icon(Icons.file_download),
+                          onPressed: () {
+                            final RenderBox button = context.findRenderObject() as RenderBox;
+                            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                            final RelativeRect position = RelativeRect.fromRect(
+                              Rect.fromPoints(
+                                button.localToGlobal(Offset.zero, ancestor: overlay),
+                                button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                              ),
+                              Offset.zero & overlay.size,
+                            );
+
+                            showMenu(
+                              context: context,
+                              position: position.shift(Offset(10, 0)), 
+                              items: [
+                                const PopupMenuItem(
+                                  value: 'CSV',
+                                  child: Text('Export as CSV'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'Excel',
+                                  child: Text('Export as Excel'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'PDF',
+                                  child: Text('Export as PDF'),
+                                ),
+                              ],
+                            ).then((value) {
+                              if (value != null) {
+                                _export(value);
+                              }
                             });
                           },
-                          filterWidth: adjustedFilterWidth,
-                          fontSize: fontSize,
-                        );
-                      },
+                          tooltip: 'Export',
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -139,17 +223,37 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 scrollDirection: Axis.horizontal,
                 child: SingleChildScrollView(
                   child: DataTable(
-                    columnSpacing: screenWidth * 0.07, // Adjust spacing between columns
+                    columnSpacing: screenWidth * 0.075, // Adjust spacing between columns
+                    showCheckboxColumn: false, // Remove the checkboxes
                     columns: [
-                      DataColumn(label: Text('Name', style: TextStyle(fontSize: fontSize))),
-                      DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize))),
-                      DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize))),
-                      DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize))),
-                      DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize))),
-                      DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize))),
+                      DataColumn(
+                        label: InkWell(
+                          onTap: _sortByName,
+                          child: Row(
+                            children: [
+                              Text('Name', style: TextStyle(fontSize: fontSize, color: Colors.grey)),
+                              Icon(
+                                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                                size: fontSize,
+                                color: Colors.grey,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                      DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                      DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                      DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                      DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
                     ],
                     rows: pageItems.map((subscription) {
                       return DataRow(
+                        onSelectChanged: (selected) {
+                          if (selected == true) {
+                            _showSubscriptionDetails(subscription);
+                          }
+                        },
                         cells: [
                           DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
                           DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
@@ -237,5 +341,3 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     );
   }
 }
-
-

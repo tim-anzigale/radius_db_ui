@@ -6,6 +6,7 @@ import 'package:radius_db_ui/classes/subscription_class.dart';
 import './pages/home_screen.dart';
 import './pages/subscriptions_page.dart';
 import './pages/settings.dart';
+import './pages/profile_page.dart'; // Import the profile page
 import 'services/api_service.dart';
 import 'theme_provider.dart';
 import './Theme/theme_manager.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/subscriptions': (context) => SubscriptionsPage(subscriptions: subscriptions),
         '/view_all_subscriptions': (context) => ViewAllSubscriptionsPage(subscriptions: subscriptions),
         '/settings': (context) => const SettingsPage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }
