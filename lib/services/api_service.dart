@@ -6,7 +6,8 @@ import '../classes/subscription_class.dart';
 
 Future<List<Subscription>> fetchSubscriptions() async {
  // final response = await http.get(Uri.parse('https://d4a5-102-222-6-1.ngrok-free.app/api/subscriptions'));
-  final response = await http.get(Uri.parse('http://localhost:5000/api/subscriptions'));
+  final response = await http.get(Uri.parse('http://dev.api.inet.africa:5000/api/subscriptions'));
+//final response = await http.get(Uri.parse('http://localhost:5000/api/subscriptions'));
 
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
@@ -15,4 +16,3 @@ Future<List<Subscription>> fetchSubscriptions() async {
     throw Exception('Failed to load subscriptions');
   }
 }
-//final response = await http.get(Uri.parse('http://localhost:5000/api/subscriptions'));
