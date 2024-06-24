@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,28 +14,28 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(), // Dark theme
       themeMode: ThemeMode.system, // Use system theme mode
       home: Scaffold(
-        appBar: AppBar(title: Text('Neumorphism Design')),
+        appBar: AppBar(title: const Text('Neumorphism Design')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ConcaveNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Concave'))),
-              SizedBox(height: 20),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Concave'))),
+              const SizedBox(height: 20),
               ConvexNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Convex'))),
-              SizedBox(height: 20),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Convex'))),
+              const SizedBox(height: 20),
               FlatNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Flat'))),
-              SizedBox(height: 20),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Flat'))),
+              const SizedBox(height: 20),
               DarkConcaveNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Concave'))),
-              SizedBox(height: 20),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Concave'))),
+              const SizedBox(height: 20),
               DarkConvexNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Convex'))),
-              SizedBox(height: 20),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Convex'))),
+              const SizedBox(height: 20),
               DarkFlatNeumorphismDesign(
-                  child: Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Flat'))),
+                  child: const Padding(padding: EdgeInsets.all(16.0), child: Text('Dark Flat'))),
             ],
           ),
         ),
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
 class ConcaveNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  ConcaveNeumorphismDesign({required this.child});
+  ConcaveNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +75,7 @@ class ConcaveNeumorphismDesign extends StatelessWidget {
 class ConvexNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  ConvexNeumorphismDesign({required this.child});
+  ConvexNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +103,7 @@ class ConvexNeumorphismDesign extends StatelessWidget {
 class FlatNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  FlatNeumorphismDesign({required this.child});
+  FlatNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +124,7 @@ class FlatNeumorphismDesign extends StatelessWidget {
 class DarkConcaveNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  DarkConcaveNeumorphismDesign({required this.child});
+  DarkConcaveNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +152,7 @@ class DarkConcaveNeumorphismDesign extends StatelessWidget {
 class DarkConvexNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  DarkConvexNeumorphismDesign({required this.child});
+  DarkConvexNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +180,7 @@ class DarkConvexNeumorphismDesign extends StatelessWidget {
 class DarkFlatNeumorphismDesign extends StatelessWidget {
   final Widget child;
 
-  DarkFlatNeumorphismDesign({required this.child});
+  DarkFlatNeumorphismDesign({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

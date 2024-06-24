@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../classes/subscription_class.dart'; // Update the path if necessary
+import '../models/subscription_class.dart'; // Update the path if necessary
 
 class SubscriptionDetailsModal extends StatelessWidget {
   final Subscription subscription;

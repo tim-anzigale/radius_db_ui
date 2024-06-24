@@ -10,7 +10,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart'; // For kIsWeb
-import '../classes/subscription_class.dart';
+import '../models/subscription_class.dart';
 
 class ExportService {
   static Future<void> exportToCSV(List<Subscription> data, String fileName) async {

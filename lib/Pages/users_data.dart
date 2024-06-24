@@ -1,0 +1,108 @@
+// users_data.dart
+const List<Map<String, dynamic>> users = [
+  {
+    "_id": "64ce9e2c78948fcd8b40fbfc",
+    "first_name": "Sumeet",
+    "last_name": "Rajpal",
+    "admin": true,
+    "profile": "READ",
+    "email": "sumeet@inet.africa",
+    "phone": "+254743236412",
+    "username": "sumeetrajpal",
+    "created_at": "2023-08-05T19:08:28.256Z",
+    "updatedAt": "2024-02-12T14:06:56.285Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb6f",
+    "first_name": "Steve",
+    "last_name": "Rioba",
+    "admin": true,
+    "profile": "READ",
+    "email": "steve@inet.africa",
+    "phone": "+254712345678",
+    "username": "steverioba",
+    "created_at": "2023-09-01T10:20:30.123Z",
+    "updatedAt": "2024-03-10T11:15:45.456Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb70",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "admin": false,
+    "profile": "EDIT",
+    "email": "jane.doe@example.com",
+    "phone": "+254734567890",
+    "username": "janedoe",
+    "created_at": "2023-10-12T08:45:30.789Z",
+    "updatedAt": "2024-01-20T09:30:25.678Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb71",
+    "first_name": "John",
+    "last_name": "Smith",
+    "admin": false,
+    "profile": "EDIT",
+    "email": "john.smith@example.com",
+    "phone": "+254701234567",
+    "username": "johnsmith",
+    "created_at": "2023-11-05T14:25:40.567Z",
+    "updatedAt": "2024-02-15T15:35:50.789Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb73",
+    "first_name": "Bob",
+    "last_name": "Brown",
+    "admin": false,
+    "profile": "EDIT",
+    "email": "bob.brown@example.com",
+    "phone": "+254798765432",
+    "username": "bobbrown",
+    "created_at": "2023-08-25T09:15:25.678Z",
+    "updatedAt": "2024-03-20T10:25:30.789Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb74",
+    "first_name": "Charlie",
+    "last_name": "Davis",
+    "admin": true,
+    "profile": "READ",
+    "email": "charlie.davis@example.com",
+    "phone": "+254745678901",
+    "username": "charliedavis",
+    "created_at": "2023-09-15T11:10:40.567Z",
+    "updatedAt": "2024-05-25T12:20:50.789Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb75",
+    "first_name": "David",
+    "last_name": "Evans",
+    "admin": false,
+    "profile": "EDIT",
+    "email": "david.evans@example.com",
+    "phone": "+254701234567",
+    "username": "davidevans",
+    "created_at": "2023-07-30T16:35:50.789Z",
+    "updatedAt": "2024-02-10T17:45:55.456Z",
+    "__v": 0
+  },
+  {
+    "_id": "64d411f90c633ba545e6bb76",
+    "first_name": "Emma",
+    "last_name": "Wilson",
+    "admin": true,
+    "profile": "READ",
+    "email": "emma.wilson@example.com",
+    "phone": "+254798765432",
+    "username": "emmawilson",
+    "created_at": "2023-06-20T14:45:30.123Z",
+    "updatedAt": "2024-01-05T15:55:40.567Z",
+    "__v": 0
+  },
+
+];

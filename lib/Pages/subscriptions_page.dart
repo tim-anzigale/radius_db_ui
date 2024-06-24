@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../classes/subscription_class.dart';
+import '../models/subscription_class.dart';
 import '../components/subscription_view.dart';
-import '../navigation_drawer.dart';
 import '../components/header.dart';
-import '../components/neumorphic.dart'; 
+import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import your theme provider
 
 class SubscriptionsPage extends StatelessWidget {
   final List<Subscription> subscriptions;
+  final Function(Subscription) onSubscriptionSelected;
 
-  const SubscriptionsPage({super.key, required this.subscriptions});
+  const SubscriptionsPage({
+    super.key,
+    required this.subscriptions,
+    required this.onSubscriptionSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const SideMenu(),
       appBar: AppBar(
         title: const Text('Subscriptions'),
         surfaceTintColor: Colors.transparent,
-        elevation: 0, // Optional: Set elevation to 0 if you want a flat AppBar
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -42,13 +44,19 @@ class SubscriptionsPage extends StatelessWidget {
         ? DarkFlatNeumorphismDesign(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SubscriptionsView(subscriptions: subscriptions),
+              child: SubscriptionsView(
+                subscriptions: subscriptions,
+                onSubscriptionSelected: onSubscriptionSelected,
+              ),
             ),
           )
         : FlatNeumorphismDesign(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SubscriptionsView(subscriptions: subscriptions),
+              child: SubscriptionsView(
+                subscriptions: subscriptions,
+                onSubscriptionSelected: onSubscriptionSelected,
+              ),
             ),
           );
   }

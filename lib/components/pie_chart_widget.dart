@@ -1,40 +1,71 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:radius_db_ui/classes/subscription_class.dart';
+import 'package:radius_db_ui/models/subscription_class.dart';
+import '../services/api_service.dart'; // Import your API service
 
-class PieChartWidget extends StatelessWidget {
+class PieChartWidget extends StatefulWidget {
   final List<Subscription> subscriptions;
 
   const PieChartWidget({super.key, required this.subscriptions});
 
   @override
+  _PieChartWidgetState createState() => _PieChartWidgetState();
+}
+
+class _PieChartWidgetState extends State<PieChartWidget> {
+  late List<Subscription> _subscriptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscriptions = widget.subscriptions;
+  }
+
+  Future<void> _refreshData() async {
+    List<Subscription> newData = await fetchSubscriptions();
+    setState(() {
+      _subscriptions = newData;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    int connectedCount = subscriptions.where((subscription) => !subscription.isDisconnected && !subscription.isTerminated).length;
-    int disconnectedCount = subscriptions.where((subscription) => subscription.isDisconnected).length;
-    int terminatedCount = subscriptions.where((subscription) => subscription.isTerminated).length;
+    int connectedCount = _subscriptions.where((subscription) => !subscription.isDisconnected && !subscription.isTerminated).length;
+    int disconnectedCount = _subscriptions.where((subscription) => subscription.isDisconnected).length;
+    int terminatedCount = _subscriptions.where((subscription) => subscription.isTerminated).length;
 
-    if (kDebugMode) {
-      print('Subscriptions Length: ${subscriptions.length}');
+    /**if (kDebugMode) {
+      print('Subscriptions Length: ${_subscriptions.length}');
     }
-    print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');
+    print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');**/
 
-    if (subscriptions.isEmpty) {
+    if (_subscriptions.isEmpty) {
       return const Center(child: Text('No data available'));
     }
 
-    subscriptions.forEach((subscription) {
+   /** _subscriptions.forEach((subscription) {
       print('Subscription: ${subscription.name}, IP: ${subscription.lastCon.ip}, Plan: ${subscription.plan.name}');
-    });
+    });**/
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0), // Add padding to the title
-          child: Text(
-            'Subscription Status',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Padding(
+          padding: const EdgeInsets.all(16.0), // Add padding to the title
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Subscription Status',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _refreshData,
+                tooltip: 'Refresh',
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),

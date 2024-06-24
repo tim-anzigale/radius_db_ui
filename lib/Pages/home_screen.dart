@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:radius_db_ui/classes/subscription_class.dart';
+import 'package:radius_db_ui/models/subscription_class.dart';
 import 'package:radius_db_ui/components/pie_chart_widget.dart';
 import 'package:radius_db_ui/components/user_stats.dart';
 import '../components/header.dart';
 import '../components/recent_subscriptions_view.dart';
+import '../components/subscriptions_bar_chart.dart';
 import '../components/top_plans_view.dart';
-import '../navigation_drawer.dart';
 import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 
 class HomeScreen extends StatefulWidget {
   final List<Subscription> subscriptions;
+  final VoidCallback onViewAllPressed;
+  final Function(Subscription) onSubscriptionSelected;
+  final VoidCallback onViewMorePlans;
 
-  const HomeScreen({Key? key, required this.subscriptions}) : super(key: key);
+  const HomeScreen({
+    Key? key,
+    required this.subscriptions,
+    required this.onViewAllPressed,
+    required this.onSubscriptionSelected,
+    required this.onViewMorePlans,
+  }) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -23,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const SideMenu(),
       appBar: AppBar(
         title: const Text('Home'),
         surfaceTintColor: Colors.transparent,
@@ -38,7 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildNeumorphismContainer(
               context,
-              RecentSubscriptionsView(subscriptions: widget.subscriptions),
+              RecentSubscriptionsView(
+                subscriptions: widget.subscriptions,
+                onViewAllPressed: widget.onViewAllPressed,
+                onSubscriptionSelected: widget.onSubscriptionSelected,
+              ),
             ),
             const SizedBox(height: 20),
             _buildGridSection(context, widget.subscriptions),
@@ -63,11 +75,18 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         _buildNeumorphismContainer(
           context,
-          TopPlansView(subscriptions: subscriptions),
+          TopPlansView(
+            subscriptions: subscriptions,
+            onViewMorePressed: widget.onViewMorePlans, // Pass the callback
+          ),
         ),
         _buildNeumorphismContainer(
           context,
           PieChartWidget(subscriptions: subscriptions),
+        ),
+        _buildNeumorphismContainer(
+          context,
+          SubscriptionsBarChart(subscriptions: widget.subscriptions),
         ),
       ],
     );
