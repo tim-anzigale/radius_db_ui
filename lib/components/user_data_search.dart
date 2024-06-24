@@ -1,5 +1,5 @@
 // search_class.dart
-import '../classes/subscription_class.dart';
+import '../models/subscription_class.dart';
 
 List<Subscription> searchSubscriptions(List<Subscription> subscriptions, String query) {
   if (query.isEmpty) {

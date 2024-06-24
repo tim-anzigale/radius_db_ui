@@ -4,28 +4,31 @@ import '../components/neumorphic.dart'; // Import the FlatNeumorphismDesign widg
 import '../theme_provider.dart'; // Import the theme provider
 
 class CustomPagination extends StatelessWidget {
-  final int totalPage;
+  final int totalItems;
   final int currentPage;
   final ValueChanged<int> onPageChange;
+  final ValueChanged<int> onItemsPerPageChange;
   final int show;
   final double fontSize;
 
   const CustomPagination({
     super.key,
-    required this.totalPage,
+    required this.totalItems,
     required this.currentPage,
     required this.onPageChange,
+    required this.onItemsPerPageChange,
     this.show = 4,
     this.fontSize = 14.0,
   });
 
- @override
+  @override
   Widget build(BuildContext context) {
-    if (totalPage <= 0) return const SizedBox(); // Handle cases where there are no pages
+    if (totalItems <= 0) return const SizedBox(); // Handle cases where there are no items
 
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
 
+    int totalPage = (totalItems / show).ceil();
     List<Widget> paginationItems = [];
 
     // Add previous page button
@@ -67,14 +70,18 @@ class CustomPagination extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: paginationItems.map((widget) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: isDarkMode
-              ? DarkFlatNeumorphismDesign(child: widget)
-              : FlatNeumorphismDesign(child: widget),
-        );
-      }).toList(),
+      children: [
+        _buildItemsPerPageDropdown(isDarkMode),
+        const SizedBox(width: 20),
+        ...paginationItems.map((widget) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: isDarkMode
+                ? DarkFlatNeumorphismDesign(child: widget)
+                : FlatNeumorphismDesign(child: widget),
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -83,7 +90,7 @@ class CustomPagination extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          if (pageIndex >= 0 && pageIndex < totalPage) {
+          if (pageIndex >= 0 && pageIndex < (totalItems / show).ceil()) {
             onPageChange(pageIndex);
           }
         },
@@ -110,7 +117,7 @@ class CustomPagination extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          if (pageIndex >= 0 && pageIndex < totalPage) {
+          if (pageIndex >= 0 && pageIndex < (totalItems / show).ceil()) {
             onPageChange(pageIndex);
           }
         },
@@ -136,6 +143,29 @@ class CustomPagination extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildItemsPerPageDropdown(bool isDarkMode) {
+    return DropdownButton<int>(
+      value: show,
+      items: [5, 10, 20, 50, 100]
+          .map((itemsPerPage) => DropdownMenuItem<int>(
+                value: itemsPerPage,
+                child: Text(
+                  itemsPerPage.toString(),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+              ))
+          .toList(),
+      onChanged: (newValue) {
+        if (newValue != null) {
+          onItemsPerPageChange(newValue);
+        }
+      },
+      dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../classes/subscription_class.dart';
+import '../models/subscription_class.dart';
 import '../components/user_stats.dart';
 
 class UserStatsCardGridView extends StatelessWidget {
@@ -15,7 +15,7 @@ class UserStatsCardGridView extends StatelessWidget {
 
     // Determine the child aspect ratio based on screen width
     if (screenWidth >= 1200) {
-      childAspectRatio = 2.6; // Larger screens (e.g., tablets, laptops)
+      childAspectRatio = 2.4; // Larger screens (e.g., tablets, laptops)
     } else if (screenWidth >= 800) {
       childAspectRatio = 1.5; // Medium screens (e.g., large tablets)
     } else {

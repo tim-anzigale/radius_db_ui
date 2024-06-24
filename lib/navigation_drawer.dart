@@ -1,111 +1,105 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../pages/settings.dart'; // Import your settings page
-import '../pages/profile_page.dart'; // Import the profile page
-import '../components/neumorphic.dart'; // Import the file containing FlatNeumorphismDesign
-import '../theme_provider.dart'; // Import the theme provider
+import '../theme_provider.dart';
 
 class SideMenu extends StatefulWidget {
-  const SideMenu({Key? key}) : super(key: key);
+  final int selectedIndex;
+  final Function(int) onItemSelected;
+
+  const SideMenu({
+    Key? key,
+    required this.selectedIndex,
+    required this.onItemSelected,
+  }) : super(key: key);
 
   @override
   _SideMenuState createState() => _SideMenuState();
 }
 
 class _SideMenuState extends State<SideMenu> {
-  String _selectedTile = '';
-
-  void _onTileSelected(String title) {
-    setState(() {
-      _selectedTile = title;
-    });
-  }
+  String? _hoveredTile;
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    final menuColor = isDarkMode ? const Color(0xFF2E2E2E) : Colors.grey[200];
 
-    return Drawer(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                _buildDrawerHeader(isDarkMode),
-                _buildDrawerTile(
-                  icon: Icons.home,
-                  text: 'Dashboard',
-                  isSelected: _selectedTile == 'Dashboard',
-                  onTap: () {
-                    _onTileSelected('Dashboard');
-                    Navigator.pop(context); // Close the drawer
-                    // Navigate to the home screen
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  isDarkMode: isDarkMode,
-                ),
-                _buildDrawerTile(
-                  icon: Icons.person,
-                  text: 'Subscriptions',
-                  isSelected: _selectedTile == 'Subscriptions',
-                  onTap: () {
-                    _onTileSelected('Subscriptions');
-                    Navigator.pop(context); // Close the drawer
-                    // Navigate to the subscriptions page
-                    Navigator.pushReplacementNamed(context, '/subscriptions');
-                  },
-                  isDarkMode: isDarkMode,
-                ),
-                _buildDrawerTile(
-                  icon: Icons.settings,
-                  text: 'Settings',
-                  isSelected: _selectedTile == 'Settings',
-                  onTap: () {
-                    _onTileSelected('Settings');
-                    Navigator.pop(context); // Close the drawer
-                    // Navigate to the settings page
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-                  },
-                  isDarkMode: isDarkMode,
-                ),
-              ],
-            ),
+    return Stack(
+      children: [
+        Container(
+          width: 80, // Set the width of the side menu
+          decoration: BoxDecoration(
+            color: menuColor,
           ),
-          // Profile tile
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListTile(
-              leading: const CircleAvatar(
-                backgroundImage: NetworkImage('https://example.com/your-profile-picture.jpg'),
+          child: Column(
+            children: [
+              _buildDrawerHeader(isDarkMode),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.home,
+                text: 'Dashboard',
+                index: 0,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Dashboard',
               ),
-              title: Text(
-                'Tim',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: isDarkMode ? Colors.grey[200] : Colors.grey[900], // Text color based on theme
-                ),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.person,
+                text: 'Subscriptions',
+                index: 1,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Subscriptions',
               ),
-              subtitle: Text(
-                'System Admin',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey, // Subtitle color based on theme
-                ),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.people,
+                text: 'Users',
+                index: 2,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Users',
               ),
-              trailing: Icon(Icons.keyboard_arrow_right, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
-              onTap: () {
-                // Navigate to the profile page
-                Navigator.pop(context); // Close the drawer
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
-              },
-            ),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.list,
+                text: 'Plans',
+                index: 3,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Plans',
+              ),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.alt_route,
+                text: 'Poles',
+                index: 4,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Poles',
+              ),
+              _buildDrawerTile(
+                context: context,
+                icon: Icons.settings,
+                text: 'Settings',
+                index: 5,
+                isDarkMode: isDarkMode,
+                isHovered: _hoveredTile == 'Settings',
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: _buildDrawerTile(
+            context: context,
+            icon: Icons.account_circle,
+            text: 'Profile',
+            index: 6,
+            isDarkMode: isDarkMode,
+            isHovered: _hoveredTile == 'Profile',
+          ),
+        ),
+      ],
     );
   }
 
@@ -115,18 +109,18 @@ class _SideMenuState extends State<SideMenu> {
       alignment: Alignment.center,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF2E2E2E) : Colors.grey[200], // Background color based on theme
+        color: isDarkMode ? const Color(0xFF2E2E2E) : Colors.grey[200],
       ),
-      child: Row(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.computer, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
-          const SizedBox(width: 10),
+          const SizedBox(height: 10),
           Text(
             'Radius',
             style: TextStyle(
               color: isDarkMode ? Colors.grey[200] : Colors.grey[900],
-              fontSize: 24,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -136,91 +130,54 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _buildDrawerTile({
+    required BuildContext context,
     required IconData icon,
     required String text,
-    required bool isSelected,
-    required VoidCallback onTap,
+    required int index,
     required bool isDarkMode,
+    required bool isHovered,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Material(
-        color: isSelected ? (isDarkMode ? Colors.blueGrey[800] : Colors.blueGrey[100]) : Colors.transparent,
-        elevation: isSelected ? 2 : 0,
-        borderRadius: BorderRadius.circular(10),
-        child: _HoverableListTile(
-          icon: icon,
-          text: text,
-          isSelected: isSelected,
-          onTap: onTap,
-          hoverColor: isDarkMode ? const Color(0xFF403943) : const Color(0xFF403943),
-          isDarkMode: isDarkMode,
-        ),
-      ),
-    );
-  }
-}
+    final isSelected = widget.selectedIndex == index;
 
-class _HoverableListTile extends StatefulWidget {
-  final IconData icon;
-  final String text;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final Color hoverColor;
-  final bool isDarkMode;
-
-  const _HoverableListTile({
-    required this.icon,
-    required this.text,
-    required this.isSelected,
-    required this.onTap,
-    required this.hoverColor,
-    required this.isDarkMode,
-  });
-
-  @override
-  _HoverableListTileState createState() => _HoverableListTileState();
-}
-
-class _HoverableListTileState extends State<_HoverableListTile> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color? textColor = _isHovered
-        ? Colors.white
-        : (widget.isSelected
-            ? Colors.blueGrey[800]
-            : (widget.isDarkMode ? Colors.grey[200] : Colors.grey[800]));
     return MouseRegion(
       onEnter: (_) {
         setState(() {
-          _isHovered = true;
+          _hoveredTile = text;
         });
       },
       onExit: (_) {
         setState(() {
-          _isHovered = false;
+          _hoveredTile = null;
         });
       },
-      child: InkWell(
-        onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(10),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          widget.onItemSelected(index);
+        },
         child: Container(
+          width: 80, // Ensure it touches the edges
+          padding: const EdgeInsets.symmetric(vertical: 15.0),
           decoration: BoxDecoration(
-            color: _isHovered ? widget.hoverColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+            color: isSelected
+                ? (isDarkMode ? Colors.blueGrey[800] : Colors.blueGrey[100])
+                : (isHovered
+                    ? (isDarkMode ? const Color(0xFF403943) : const Color(0xFFE0E0E0))
+                    : Colors.transparent),
           ),
-          child: ListTile(
-            leading: Icon(widget.icon, color: textColor),
-            title: Text(
-              widget.text,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 13, // Adjusted font size
+          child: Column(
+            children: [
+              Icon(icon, color: isDarkMode ? Colors.grey[200] : Colors.grey[900]),
+              const SizedBox(height: 2),
+              Text(
+                text,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[200] : Colors.grey[900],
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            trailing: Icon(Icons.keyboard_arrow_right, color: textColor),
+            ],
           ),
         ),
       ),

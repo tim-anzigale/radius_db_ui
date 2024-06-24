@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:radius_db_ui/Pages/view_all_page.dart';
-import 'package:radius_db_ui/classes/subscription_class.dart';
-import 'subscription_details_modal.dart'; // Import the modal widget
+import 'package:radius_db_ui/models/subscription_class.dart';
 
 class RecentSubscriptionsView extends StatefulWidget {
-  const RecentSubscriptionsView({super.key, required this.subscriptions});
+  const RecentSubscriptionsView({
+    Key? key,
+    required this.subscriptions,
+    required this.onViewAllPressed,
+    required this.onSubscriptionSelected,
+  }) : super(key: key);
 
   final List<Subscription> subscriptions;
+  final VoidCallback onViewAllPressed;
+  final Function(Subscription) onSubscriptionSelected;
 
   @override
   _RecentSubscriptionsViewState createState() => _RecentSubscriptionsViewState();
@@ -25,7 +30,9 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
   void _filterRecentSubscriptions() {
     final DateTime now = DateTime.now();
     final DateTime cutoffDate = now.subtract(const Duration(days: 30));
-    _recentSubscriptions = widget.subscriptions.where((subscription) => subscription.createdAt.isAfter(cutoffDate)).toList();
+    _recentSubscriptions = widget.subscriptions
+        .where((subscription) => subscription.createdAt.isAfter(cutoffDate))
+        .toList();
   }
 
   void _sortByName() {
@@ -38,20 +45,11 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     });
   }
 
-  void _showSubscriptionDetails(Subscription subscription) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SubscriptionDetailsModal(subscription: subscription);
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double fontSize = screenWidth > 600 ? 13 : 10;
-    final double titleFontSize = screenWidth > 600 ? 16 : 12;
+    final double titleFontSize = screenWidth > 600 ? 15 : 12;
 
     return Column(
       children: [
@@ -59,7 +57,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(14.0),
               child: Text(
                 'Recent Subscriptions',
                 style: TextStyle(
@@ -69,14 +67,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ViewAllSubscriptionsPage(subscriptions: widget.subscriptions),
-                  ),
-                );
-              },
+              onPressed: widget.onViewAllPressed,
               child: const Text('View All'),
             ),
           ],
@@ -84,7 +75,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            columnSpacing: screenWidth * 0.075, // Adjust spacing between columns
+            columnSpacing: screenWidth * 0.065, // Adjust spacing between columns
             showCheckboxColumn: false, // Remove the checkboxes
             columns: [
               DataColumn(
@@ -112,7 +103,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
               return DataRow(
                 onSelectChanged: (selected) {
                   if (selected == true) {
-                    _showSubscriptionDetails(subscription);
+                    widget.onSubscriptionSelected(subscription);
                   }
                 },
                 cells: [

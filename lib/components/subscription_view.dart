@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:radius_db_ui/components/user_data_search.dart';
 import 'package:radius_db_ui/user_data.dart';
 import '../services/api_service.dart'; // API service for subscriptions
-import '../classes/subscription_class.dart'; // Models
+import '../models/subscription_class.dart'; // Models
 import '../components/pagination.dart';
 import '../components/search_bar.dart' as custom;
 import 'filters.dart'; // Import the Filters class
@@ -10,9 +10,10 @@ import 'subscription_details_modal.dart'; // Import the modal widget
 import '../services/export_service.dart'; // Import the export service
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key, required this.subscriptions});
+  const SubscriptionsView({super.key, required this.subscriptions, required this.onSubscriptionSelected});
 
   final List<Subscription> subscriptions;
+  final void Function(Subscription) onSubscriptionSelected;
 
   @override
   _SubscriptionsViewState createState() => _SubscriptionsViewState();
@@ -22,7 +23,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   late Future<List<Subscription>> _futureSubscriptions;
   List<Subscription> _subscriptions = [];
   List<Subscription> _filteredSubscriptions = [];
-  final int _rowsPerPage = 10;
+  int _rowsPerPage = 10;
   int _currentPage = 0;
   int _totalPages = 0;
   final TextEditingController _searchController = TextEditingController();
@@ -74,12 +75,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   }
 
   void _showSubscriptionDetails(Subscription subscription) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SubscriptionDetailsModal(subscription: subscription);
-      },
-    );
+    widget.onSubscriptionSelected(subscription);
   }
 
   void _export(String format) async {
@@ -98,6 +94,14 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$format Exported')),
     );
+  }
+
+  void _onItemsPerPageChanged(int newValue) {
+    setState(() {
+      _rowsPerPage = newValue;
+      _totalPages = (_filteredSubscriptions.length / _rowsPerPage).ceil();
+      _currentPage = 0;
+    });
   }
 
   @override
@@ -191,7 +195,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
 
                             showMenu(
                               context: context,
-                              position: position.shift(Offset(10, 0)), 
+                              position: position.shift(const Offset(10, 0)),
                               items: [
                                 const PopupMenuItem(
                                   value: 'CSV',
@@ -223,7 +227,7 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                 scrollDirection: Axis.horizontal,
                 child: SingleChildScrollView(
                   child: DataTable(
-                    columnSpacing: screenWidth * 0.075, // Adjust spacing between columns
+                    columnSpacing: screenWidth * 0.065, // Adjust spacing between columns
                     showCheckboxColumn: false, // Remove the checkboxes
                     columns: [
                       DataColumn(
@@ -301,37 +305,36 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 ),
               ),
-              if (_filteredSubscriptions.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (_totalPages > 1)
-                        CustomPagination(
-                          totalPage: _totalPages,
-                          currentPage: _currentPage,
-                          onPageChange: (number) {
-                            setState(() {
-                              _currentPage = number;
-                            });
-                          },
-                          show: 4,
-                          fontSize: fontSize,
-                        ),
-                    ],
-                  ),
+                    ),
+                    CustomPagination(
+                      totalItems: _filteredSubscriptions.length,
+                      currentPage: _currentPage,
+                      onPageChange: (number) {
+                        setState(() {
+                          _currentPage = number;
+                        });
+                      },
+                      onItemsPerPageChange: _onItemsPerPageChanged,
+                      show: _rowsPerPage,
+                      fontSize: fontSize,
+                    ),
+                  ],
                 ),
+              ),
             ],
           );
         } else {
