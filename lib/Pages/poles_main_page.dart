@@ -55,7 +55,7 @@ class PolesMainPage extends StatelessWidget {
     );
   }
 
-  // Helper function to build the Neumorphism container based on the theme
+  // Helper function to build the Neumorphism container.
   Widget _buildNeumorphismContainer(BuildContext context, String title, VoidCallback onTap) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
