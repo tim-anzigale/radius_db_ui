@@ -10,7 +10,7 @@ import 'subscription_details_modal.dart'; // Import the modal widget
 import '../services/export_service.dart'; // Import the export service
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({super.key, required this.subscriptions, required this.onSubscriptionSelected});
+  const SubscriptionsView({Key? key, required this.subscriptions, required this.onSubscriptionSelected}) : super(key: key);
 
   final List<Subscription> subscriptions;
   final void Function(Subscription) onSubscriptionSelected;
@@ -305,6 +305,16 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   ),
                 ),
               ),
+              if (_filteredSubscriptions.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Center(
+                    child: Text(
+                      'No matching results found.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 child: Row(
@@ -312,7 +322,9 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
                   children: [
                     Flexible(
                       child: Text(
-                        'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
+                        _filteredSubscriptions.isEmpty
+                          ? 'No entries'
+                          : 'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
