@@ -4,7 +4,7 @@ import '../models/poles_path_class.dart';
 import '../models/subscription_class.dart';
 import '../models/plan_class.dart';
 import '../models/pole_class.dart'; // Import the Pole model
-import '../models/users_class.dart'; // Import the User model
+import '../models/users_class.dart'; 
 
 Future<Map<String, dynamic>> fetchSubscriptions(int page, int pageSize) async {
   final response = await http.get(Uri.parse('https://localhost:5000/api/subscriptions?page=$page&pageSize=$pageSize'));
