@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:radius_db_ui/models/subscription_class.dart';
 import 'package:radius_db_ui/components/pie_chart_widget.dart';
 import 'package:radius_db_ui/components/user_stats.dart';
+import '../components/custom_app_bar.dart';
 import '../components/header.dart';
 import '../components/recent_subscriptions_view.dart';
 import '../components/subscriptions_bar_chart.dart';
@@ -10,19 +11,24 @@ import '../components/top_plans_view.dart';
 import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 
+
 class HomeScreen extends StatefulWidget {
   final List<Subscription> subscriptions;
   final VoidCallback onViewAllPressed;
   final Function(Subscription) onSubscriptionSelected;
   final VoidCallback onViewMorePlans;
+  final DateTime? lastSyncedTime;
+  final String syncStatus;
 
   const HomeScreen({
-    Key? key,
+    super.key,
     required this.subscriptions,
     required this.onViewAllPressed,
     required this.onSubscriptionSelected,
     required this.onViewMorePlans,
-  }) : super(key: key);
+    required this.lastSyncedTime,
+    required this.syncStatus,
+  });
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -32,9 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        surfaceTintColor: Colors.transparent,
+      appBar: CustomAppBar(
+        title: 'Home',
+        lastSyncedTime: widget.lastSyncedTime,
+        syncStatus: widget.syncStatus,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -47,13 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNeumorphismContainer(
               context,
               RecentSubscriptionsView(
-                subscriptions: widget.subscriptions,
                 onViewAllPressed: widget.onViewAllPressed,
                 onSubscriptionSelected: widget.onSubscriptionSelected,
               ),
             ),
             const SizedBox(height: 20),
-            _buildGridSection(context, widget.subscriptions),
+            _buildGridSection(context),
           ],
         ),
       ),
@@ -61,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Helper function to build the grid section
-  Widget _buildGridSection(BuildContext context, List<Subscription> subscriptions) {
+  Widget _buildGridSection(BuildContext context) {
     final bool isWideScreen = MediaQuery.of(context).size.width >= 800;
     final int crossAxisCount = isWideScreen ? 2 : 1;
 
@@ -76,13 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildNeumorphismContainer(
           context,
           TopPlansView(
-            subscriptions: subscriptions,
             onViewMorePressed: widget.onViewMorePlans, // Pass the callback
           ),
         ),
         _buildNeumorphismContainer(
           context,
-          PieChartWidget(subscriptions: subscriptions),
+          const PieChartWidget(), // Updated: No longer passing subscriptions
         ),
         _buildNeumorphismContainer(
           context,

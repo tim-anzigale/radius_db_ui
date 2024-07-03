@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../components/custom_app_bar.dart';
 import '../models/subscription_class.dart';
 import '../components/subscription_view.dart';
 import '../components/header.dart';
@@ -7,21 +8,24 @@ import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import your theme provider
 
 class SubscriptionsPage extends StatelessWidget {
-  final List<Subscription> subscriptions;
   final Function(Subscription) onSubscriptionSelected;
+  final DateTime? lastSyncedTime;
+  final String syncStatus;
 
   const SubscriptionsPage({
     super.key,
-    required this.subscriptions,
     required this.onSubscriptionSelected,
+    this.lastSyncedTime,
+    this.syncStatus = "Not synced yet",
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Subscriptions'),
-        surfaceTintColor: Colors.transparent,
+      appBar: CustomAppBar(
+        title: 'Subscriptions',
+        lastSyncedTime: lastSyncedTime,
+        syncStatus: syncStatus,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -45,7 +49,6 @@ class SubscriptionsPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SubscriptionsView(
-                subscriptions: subscriptions,
                 onSubscriptionSelected: onSubscriptionSelected,
               ),
             ),
@@ -54,7 +57,6 @@ class SubscriptionsPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SubscriptionsView(
-                subscriptions: subscriptions,
                 onSubscriptionSelected: onSubscriptionSelected,
               ),
             ),

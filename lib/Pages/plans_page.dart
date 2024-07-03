@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../components/custom_app_bar.dart';
 import '../theme_provider.dart';
 import '../models/plan_class.dart';
 import '../components/neumorphic.dart';
 import '../components/plans_view.dart';
 import '../services/api_service.dart'; // Import your API service
 
+
 class PlansPage extends StatefulWidget {
   final void Function(Plan) onPlanSelected;
+  final DateTime? lastSyncedTime;
+  final String syncStatus;
 
-  const PlansPage({super.key, required this.onPlanSelected});
+  const PlansPage({
+    super.key,
+    required this.onPlanSelected,
+    this.lastSyncedTime,
+    this.syncStatus = "Not synced yet",
+  });
 
   @override
   _PlansPageState createState() => _PlansPageState();
@@ -30,9 +39,10 @@ class _PlansPageState extends State<PlansPage> {
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Plans'),
-        surfaceTintColor: Colors.transparent,
+      appBar: CustomAppBar(
+        title: 'Plans',
+        lastSyncedTime: widget.lastSyncedTime,
+        syncStatus: widget.syncStatus,
       ),
       body: Padding(
         padding: const EdgeInsets.all(0.0),

@@ -13,30 +13,25 @@ import './pages/poles_page.dart';
 import './pages/poles_path_page.dart';
 import './pages/poles_main_page.dart';
 import 'services/api_service.dart';
+import 'services/datasync_service.dart';
 import 'theme_provider.dart';
 import './theme/theme_manager.dart';
 import 'navigation_drawer.dart';
 import 'models/plan_class.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
 
-  // Fetch subscription data
-  List<Subscription> subscriptions = await fetchSubscriptions();
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: MyApp(subscriptions: subscriptions),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final List<Subscription> subscriptions;
-
-  const MyApp({Key? key, required this.subscriptions}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -47,16 +42,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeManager.buildLightTheme(),
       darkTheme: ThemeManager.buildDarkTheme(),
-      home: MainLayout(subscriptions: subscriptions),
+      home: MainLayout(),
     );
   }
 }
 
 class MainLayout extends StatefulWidget {
-  final List<Subscription> subscriptions;
-
-  const MainLayout({super.key, required this.subscriptions});
-
   @override
   _MainLayoutState createState() => _MainLayoutState();
 }
@@ -65,6 +56,12 @@ class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
   Subscription? _selectedSubscription;
   Plan? _selectedPlan;
+  List<Subscription> _subscriptions = [];
+  final DataSyncScheduler scheduler = DataSyncScheduler(
+    interval: Duration(minutes: 30),
+  );
+  DateTime? lastSyncedTime;
+  String syncStatus = "Not synced yet";
 
   final List<String> _pageTitles = [
     'Dashboard',
@@ -79,6 +76,39 @@ class _MainLayoutState extends State<MainLayout> {
     'All Poles',
     'Pole Paths',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscriptions();
+    scheduler.start();
+    scheduler.addListener(_updateSyncStatus);
+  }
+
+  @override
+  void dispose() {
+    scheduler.stop();
+    scheduler.removeListener(_updateSyncStatus);
+    super.dispose();
+  }
+
+  void _updateSyncStatus() {
+    setState(() {
+      lastSyncedTime = scheduler.lastSyncedTime;
+      syncStatus = scheduler.syncStatus;
+    });
+  }
+
+  Future<void> _loadSubscriptions() async {
+    try {
+      Map<String, dynamic> result = await fetchSubscriptions(1, 100); // Fetch initial page of subscriptions
+      setState(() {
+        _subscriptions = result['subscriptions'];
+      });
+    } catch (error) {
+      print('Error loading subscriptions: $error');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -116,17 +146,27 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     final pages = [
       HomeScreen(
-        subscriptions: widget.subscriptions,
+        subscriptions: _subscriptions,
         onViewAllPressed: () => _onItemTapped(1),
         onSubscriptionSelected: _onSubscriptionSelected,
         onViewMorePlans: _onViewMorePlans,
+        lastSyncedTime: lastSyncedTime,
+        syncStatus: syncStatus,
       ),
       SubscriptionsPage(
-        subscriptions: widget.subscriptions,
         onSubscriptionSelected: _onSubscriptionSelected,
+        lastSyncedTime: lastSyncedTime,
+        syncStatus: syncStatus,
       ),
-      const UsersPage(), // Pass users list or fetch and pass dynamically
-      PlansPage(onPlanSelected: _onPlanSelected),
+      UsersPage(
+        lastSyncedTime: lastSyncedTime,
+        syncStatus: syncStatus,
+      ),
+      PlansPage(
+        onPlanSelected: _onPlanSelected,
+        lastSyncedTime: lastSyncedTime,
+        syncStatus: syncStatus,
+      ),
       PolesMainPage(onCardTapped: _onPolesCardTapped), // PolesMainPage
       const SettingsPage(),
       const ProfilePage(),

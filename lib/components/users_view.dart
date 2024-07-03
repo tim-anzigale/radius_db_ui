@@ -1,16 +1,38 @@
 import 'package:flutter/material.dart';
-import '../models/users_class.dart'; // Adjust the import path as per your project structure
+import '../models/users_class.dart'; 
 
-class UsersView extends StatelessWidget {
-  final List<User> users; // Assuming users is passed to this widget
+class UsersView extends StatefulWidget {
+  final List<User> users; 
 
-  const UsersView({super.key, required this.users});
+  const UsersView({Key? key, required this.users}) : super(key: key);
+
+  @override
+  _UsersViewState createState() => _UsersViewState();
+}
+
+class _UsersViewState extends State<UsersView> {
+  bool _sortAscending = true;
+  int _sortColumnIndex = 4; // Index of the "Permission" column
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final int columnCount = 5; // Number of columns in the DataTable
     final double columnWidth = screenWidth / columnCount;
+
+    // Copy the users list to perform sorting
+    List<User> sortedUsers = List.from(widget.users);
+
+    // Sorting logic based on _sortColumnIndex and _sortAscending
+    sortedUsers.sort((a, b) {
+      if (_sortColumnIndex == 4) {
+        // Sort by permission (profile)
+        return _sortAscending
+            ? a.profile.toLowerCase().compareTo(b.profile.toLowerCase())
+            : b.profile.toLowerCase().compareTo(a.profile.toLowerCase());
+      }
+      return 0; // Default to no sorting
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,7 +52,7 @@ class UsersView extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: screenWidth),
             child: DataTable(
-              columnSpacing: 0, // Set to 0 to ensure columns are equally spaced
+              columnSpacing: 0, 
               columns: [
                 DataColumn(
                   label: Container(
@@ -59,11 +81,31 @@ class UsersView extends StatelessWidget {
                 DataColumn(
                   label: Container(
                     width: columnWidth,
-                    child: const Text('Permission', style: TextStyle(color: Colors.grey)),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _sortColumnIndex = 4; // Sort by "Permission" column
+                          _sortAscending = !_sortAscending; // Toggle ascending/descending
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          const Text('Permission', style: TextStyle(color: Colors.grey)),
+                          Icon(
+                            _sortColumnIndex == 4
+                                ? _sortAscending
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward
+                                : Icons.arrow_downward,
+                            size: 13,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
-              rows: users.map((user) {
+              rows: sortedUsers.map((user) {
                 return DataRow(cells: [
                   DataCell(
                     Container(

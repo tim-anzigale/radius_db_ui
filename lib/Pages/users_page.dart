@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../components/custom_app_bar.dart';
 import '../theme_provider.dart';
 import '../models/users_class.dart';
 import '../components/neumorphic.dart';
 import '../components/users_view.dart';
 import '../services/api_service.dart'; // Import your API service
 
+
 class UsersPage extends StatefulWidget {
-  const UsersPage({Key? key}) : super(key: key);
+  final DateTime? lastSyncedTime;
+  final String syncStatus;
+
+  const UsersPage({
+    super.key,
+    this.lastSyncedTime,
+    this.syncStatus = "Not synced yet",
+  });
 
   @override
   _UsersPageState createState() => _UsersPageState();
@@ -28,9 +37,10 @@ class _UsersPageState extends State<UsersPage> {
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Users'),
-        surfaceTintColor: Colors.transparent,
+      appBar: CustomAppBar(
+        title: 'Users',
+        lastSyncedTime: widget.lastSyncedTime,
+        syncStatus: widget.syncStatus,
       ),
       body: Padding(
         padding: const EdgeInsets.all(0.0),

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:radius_db_ui/models/subscription_class.dart';
+import 'package:radius_db_ui/services/api_service.dart';
 
 class RecentSubscriptionsView extends StatefulWidget {
   const RecentSubscriptionsView({
-    Key? key,
-    required this.subscriptions,
+    super.key,
     required this.onViewAllPressed,
     required this.onSubscriptionSelected,
-  }) : super(key: key);
+  });
 
-  final List<Subscription> subscriptions;
   final VoidCallback onViewAllPressed;
   final Function(Subscription) onSubscriptionSelected;
 
@@ -19,20 +18,35 @@ class RecentSubscriptionsView extends StatefulWidget {
 
 class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
   List<Subscription> _recentSubscriptions = [];
-  bool _isAscending = true; // Track the sorting order
+  bool _isAscending = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filterRecentSubscriptions();
+    _fetchData();
   }
 
-  void _filterRecentSubscriptions() {
+  Future<void> _fetchData() async {
+    try {
+      Map<String, dynamic> result = await fetchSubscriptions(1, 100); // Fetch a larger number of subscriptions
+      List<Subscription> subscriptions = result['subscriptions'];
+      setState(() {
+        _recentSubscriptions = _filterRecentSubscriptions(subscriptions);
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<Subscription> _filterRecentSubscriptions(List<Subscription> subscriptions) {
     final DateTime now = DateTime.now();
     final DateTime cutoffDate = now.subtract(const Duration(days: 30));
-    _recentSubscriptions = widget.subscriptions
-        .where((subscription) => subscription.createdAt.isAfter(cutoffDate))
-        .toList();
+    return subscriptions.where((subscription) => subscription.createdAt.isAfter(cutoffDate)).toList();
   }
 
   void _sortByName() {
@@ -50,6 +64,10 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double fontSize = screenWidth > 600 ? 13 : 10;
     final double titleFontSize = screenWidth > 600 ? 15 : 12;
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Column(
       children: [
@@ -75,8 +93,8 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            columnSpacing: screenWidth * 0.065, // Adjust spacing between columns
-            showCheckboxColumn: false, // Remove the checkboxes
+            columnSpacing: screenWidth * 0.065,
+            showCheckboxColumn: false,
             columns: [
               DataColumn(
                 label: InkWell(
@@ -111,7 +129,7 @@ class _RecentSubscriptionsViewState extends State<RecentSubscriptionsView> {
                   DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
                   DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: fontSize))),
                   DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(subscription.createdAt.toString(), style: TextStyle(fontSize: fontSize))), // Format the DateTime to a String
+                  DataCell(Text(subscription.createdAt.toString(), style: TextStyle(fontSize: fontSize))),
                   DataCell(Container(
                     width: 110,
                     decoration: BoxDecoration(

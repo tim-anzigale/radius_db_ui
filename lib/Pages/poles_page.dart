@@ -33,7 +33,7 @@ class _PolesPageState extends State<PolesPage> {
         surfaceTintColor: Colors.transparent,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(0.0),
+        padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<List<Pole>>(
           future: _futurePoles,
           builder: (context, snapshot) {
@@ -46,7 +46,6 @@ class _PolesPageState extends State<PolesPage> {
               final poles = snapshot.data!;
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
                 child: Center(
                   child: isDarkMode
                       ? DarkFlatNeumorphismDesign(

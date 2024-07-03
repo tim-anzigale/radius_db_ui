@@ -1,58 +1,67 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:radius_db_ui/models/subscription_class.dart';
 import '../services/api_service.dart'; // Import your API service
 
 class PieChartWidget extends StatefulWidget {
-  final List<Subscription> subscriptions;
-
-  const PieChartWidget({super.key, required this.subscriptions});
+  const PieChartWidget({Key? key}) : super(key: key);
 
   @override
   _PieChartWidgetState createState() => _PieChartWidgetState();
 }
 
 class _PieChartWidgetState extends State<PieChartWidget> {
-  late List<Subscription> _subscriptions;
+  List<Subscription> _subscriptions = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _subscriptions = widget.subscriptions;
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    try {
+      Map<String, dynamic> result = await fetchSubscriptions(1, 3000); // Fetch all subscriptions
+      List<Subscription> newData = result['subscriptions'];
+      setState(() {
+        _subscriptions = newData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _refreshData() async {
-    List<Subscription> newData = await fetchSubscriptions();
     setState(() {
-      _subscriptions = newData;
+      _isLoading = true;
     });
+    await _fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     int connectedCount = _subscriptions.where((subscription) => !subscription.isDisconnected && !subscription.isTerminated).length;
     int disconnectedCount = _subscriptions.where((subscription) => subscription.isDisconnected).length;
     int terminatedCount = _subscriptions.where((subscription) => subscription.isTerminated).length;
-
-    /**if (kDebugMode) {
-      print('Subscriptions Length: ${_subscriptions.length}');
-    }
-    print('Connected: $connectedCount, Disconnected: $disconnectedCount, Terminated: $terminatedCount');**/
 
     if (_subscriptions.isEmpty) {
       return const Center(child: Text('No data available'));
     }
 
-   /** _subscriptions.forEach((subscription) {
-      print('Subscription: ${subscription.name}, IP: ${subscription.lastCon.ip}, Plan: ${subscription.plan.name}');
-    });**/
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0), // Add padding to the title
+          padding: const EdgeInsets.all(16.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -70,7 +79,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 200, // Set a specific height for the pie chart
+          height: 200,
           child: PieChart(
             PieChartData(
               sections: [

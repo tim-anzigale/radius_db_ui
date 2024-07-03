@@ -16,18 +16,18 @@ class UserStats extends StatefulWidget {
 }
 
 class _UserStatsState extends State<UserStats> {
-  late Future<List<Subscription>> _futureSubscriptions;
+  late Future<Map<String, dynamic>> _futureSubscriptions;
   List<Subscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
-    _futureSubscriptions = fetchSubscriptions(); // Fetch subscriptions from API
+    _futureSubscriptions = fetchSubscriptions(1, 100); // Fetch subscriptions from API with pagination
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Subscription>>(
+    return FutureBuilder<Map<String, dynamic>>(
       future: _futureSubscriptions,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -35,7 +35,7 @@ class _UserStatsState extends State<UserStats> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          _subscriptions = snapshot.data!;
+          _subscriptions = snapshot.data!['subscriptions'];
           return Container(
             color: Theme.of(context).scaffoldBackgroundColor,
             child: UserStatsCardGridView(subscriptions: _subscriptions),

@@ -6,10 +6,9 @@ import '../components/neumorphic.dart';
 import '../theme_provider.dart'; // Import the theme provider
 
 class TopPlansView extends StatefulWidget {
-  final List<Subscription> subscriptions;
   final VoidCallback onViewMorePressed;
 
-  const TopPlansView({Key? key, required this.subscriptions, required this.onViewMorePressed}) : super(key: key);
+  const TopPlansView({Key? key, required this.onViewMorePressed}) : super(key: key);
 
   @override
   _TopPlansViewState createState() => _TopPlansViewState();
@@ -17,23 +16,44 @@ class TopPlansView extends StatefulWidget {
 
 class _TopPlansViewState extends State<TopPlansView> {
   double _fontSize = 13;
-  late List<Subscription> _subscriptions;
+  List<Subscription> _subscriptions = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _subscriptions = widget.subscriptions;
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    try {
+      Map<String, dynamic> result = await fetchSubscriptions(1, 100); // Fetch a larger number of subscriptions
+      List<Subscription> newData = result['subscriptions'];
+      setState(() {
+        _subscriptions = newData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _refreshData() async {
-    List<Subscription> newData = await fetchSubscriptions();
     setState(() {
-      _subscriptions = newData;
+      _isLoading = true;
     });
+    await _fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final sortedPlans = _getSortedPlans(_subscriptions);
     return LayoutBuilder(
       builder: (context, constraints) {

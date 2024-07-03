@@ -10,9 +10,8 @@ import 'subscription_details_modal.dart'; // Import the modal widget
 import '../services/export_service.dart'; // Import the export service
 
 class SubscriptionsView extends StatefulWidget {
-  const SubscriptionsView({Key? key, required this.subscriptions, required this.onSubscriptionSelected}) : super(key: key);
+  const SubscriptionsView({Key? key, required this.onSubscriptionSelected}) : super(key: key);
 
-  final List<Subscription> subscriptions;
   final void Function(Subscription) onSubscriptionSelected;
 
   @override
@@ -20,20 +19,20 @@ class SubscriptionsView extends StatefulWidget {
 }
 
 class _SubscriptionsViewState extends State<SubscriptionsView> {
-  late Future<List<Subscription>> _futureSubscriptions;
   List<Subscription> _subscriptions = [];
   List<Subscription> _filteredSubscriptions = [];
   int _rowsPerPage = 10;
   int _currentPage = 0;
   int _totalPages = 0;
+  int _totalSubscriptions = 0;
   final TextEditingController _searchController = TextEditingController();
   String? _selectedFilter;
-  bool _isAscending = true; // Track the sorting order
+  bool _isAscending = true;
 
   @override
   void initState() {
     super.initState();
-    _futureSubscriptions = fetchSubscriptions();
+    _loadPage(_currentPage);
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -42,6 +41,27 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPage(int page) async {
+    try {
+      final result = await fetchSubscriptions(page + 1, 100); // Fetch minimum of 100 subscriptions
+      setState(() {
+        if (page == 0) {
+          _subscriptions = result['subscriptions'];
+          _totalSubscriptions = result['totalSubscriptions'];
+        } else {
+          _subscriptions.addAll(result['subscriptions']);
+        }
+        _filteredSubscriptions = _subscriptions;
+        _totalPages = (_totalSubscriptions / _rowsPerPage).ceil();
+        _currentPage = page;
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load data: $error')),
+      );
+    }
   }
 
   void _onSearchChanged() {
@@ -99,8 +119,9 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
   void _onItemsPerPageChanged(int newValue) {
     setState(() {
       _rowsPerPage = newValue;
-      _totalPages = (_filteredSubscriptions.length / _rowsPerPage).ceil();
+      _totalPages = (_totalSubscriptions / _rowsPerPage).ceil();
       _currentPage = 0;
+      _loadPage(0);
     });
   }
 
@@ -111,248 +132,215 @@ class _SubscriptionsViewState extends State<SubscriptionsView> {
     final double titleFontSize = screenWidth > 600 ? 16 : 12;
     final double filterWidth = screenWidth > 600 ? 150 : 100;
 
-    return FutureBuilder<List<Subscription>>(
-      future: _futureSubscriptions,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          _subscriptions = snapshot.data ?? [];
-          if (_searchController.text.isEmpty && _selectedFilter == null) {
-            _filteredSubscriptions = _subscriptions;
-          }
-          _totalPages = (_filteredSubscriptions.isEmpty ? 1 : (_filteredSubscriptions.length / _rowsPerPage).ceil());
-
-          // Ensure current page is within valid range
-          if (_currentPage >= _totalPages) {
-            _currentPage = _totalPages - 1;
-          }
-          if (_currentPage < 0) {
-            _currentPage = 0;
-          }
-
-          final startIndex = _currentPage * _rowsPerPage;
-          final endIndex = (_currentPage + 1) * _rowsPerPage;
-          final List<Subscription> pageItems = _filteredSubscriptions.sublist(
-            startIndex,
-            endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex,
-          );
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Text(
+                'All Subscriptions',
+                style: TextStyle(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Text(
-                      'All Subscriptions',
-                      style: TextStyle(
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double availableWidth = constraints.maxWidth;
+                      double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
+
+                      return custom.SearchBar(
+                        searchController: _searchController,
+                        selectedFilter: _selectedFilter,
+                        onFilterChanged: (String? newValue) {
+                          setState(() {
+                            _selectedFilter = newValue;
+                            _onSearchChanged();
+                          });
+                        },
+                        filterWidth: adjustedFilterWidth,
+                        fontSize: fontSize,
+                      );
+                    },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  const SizedBox(width: 10),
+                  IconButton(
+                    icon: const Icon(Icons.file_download),
+                    onPressed: () {
+                      final RenderBox button = context.findRenderObject() as RenderBox;
+                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                      final RelativeRect position = RelativeRect.fromRect(
+                        Rect.fromPoints(
+                          button.localToGlobal(Offset.zero, ancestor: overlay),
+                          button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                        ),
+                        Offset.zero & overlay.size,
+                      );
+
+                      showMenu(
+                        context: context,
+                        position: position.shift(const Offset(10, 0)),
+                        items: [
+                          const PopupMenuItem(
+                            value: 'CSV',
+                            child: Text('Export as CSV'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'Excel',
+                            child: Text('Export as Excel'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'PDF',
+                            child: Text('Export as PDF'),
+                          ),
+                        ],
+                      ).then((value) {
+                        if (value != null) {
+                          _export(value);
+                        }
+                      });
+                    },
+                    tooltip: 'Export',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: DataTable(
+              columnSpacing: screenWidth * 0.065,
+              showCheckboxColumn: false,
+              columns: [
+                DataColumn(
+                  label: InkWell(
+                    onTap: _sortByName,
                     child: Row(
                       children: [
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            double availableWidth = constraints.maxWidth;
-                            double adjustedFilterWidth = availableWidth > 600 ? filterWidth : availableWidth - 40;
-
-                            return custom.SearchBar(
-                              searchController: _searchController,
-                              selectedFilter: _selectedFilter,
-                              onFilterChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedFilter = newValue;
-                                  _onSearchChanged();
-                                });
-                              },
-                              filterWidth: adjustedFilterWidth,
-                              fontSize: fontSize,
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        IconButton(
-                          icon: const Icon(Icons.file_download),
-                          onPressed: () {
-                            final RenderBox button = context.findRenderObject() as RenderBox;
-                            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-                            final RelativeRect position = RelativeRect.fromRect(
-                              Rect.fromPoints(
-                                button.localToGlobal(Offset.zero, ancestor: overlay),
-                                button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                              ),
-                              Offset.zero & overlay.size,
-                            );
-
-                            showMenu(
-                              context: context,
-                              position: position.shift(const Offset(10, 0)),
-                              items: [
-                                const PopupMenuItem(
-                                  value: 'CSV',
-                                  child: Text('Export as CSV'),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'Excel',
-                                  child: Text('Export as Excel'),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'PDF',
-                                  child: Text('Export as PDF'),
-                                ),
-                              ],
-                            ).then((value) {
-                              if (value != null) {
-                                _export(value);
-                              }
-                            });
-                          },
-                          tooltip: 'Export',
+                        Text('Name', style: TextStyle(fontSize: fontSize, color: Colors.grey)),
+                        Icon(
+                          _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                          size: fontSize,
+                          color: Colors.grey,
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SingleChildScrollView(
-                  child: DataTable(
-                    columnSpacing: screenWidth * 0.065, // Adjust spacing between columns
-                    showCheckboxColumn: false, // Remove the checkboxes
-                    columns: [
-                      DataColumn(
-                        label: InkWell(
-                          onTap: _sortByName,
-                          child: Row(
-                            children: [
-                              Text('Name', style: TextStyle(fontSize: fontSize, color: Colors.grey)),
-                              Icon(
-                                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                                size: fontSize,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
+                ),
+                DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+                DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
+              ],
+              rows: _filteredSubscriptions
+                  .skip(_currentPage * _rowsPerPage)
+                  .take(_rowsPerPage)
+                  .map((subscription) {
+                return DataRow(
+                  onSelectChanged: (selected) {
+                    if (selected == true) {
+                      _showSubscriptionDetails(subscription);
+                    }
+                  },
+                  cells: [
+                    DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(subscription.plan.name, style: TextStyle(fontSize: fontSize))),
+                    DataCell(Container(
+                      width: 110,
+                      decoration: BoxDecoration(
+                        color: subscription.isDisconnected
+                            ? Colors.red.withOpacity(0.1)
+                            : subscription.isTerminated
+                                ? Colors.orange.withOpacity(0.1)
+                                : Colors.green.withOpacity(0.1),
+                        border: Border.all(
+                          color: subscription.isDisconnected
+                              ? Colors.red
+                              : subscription.isTerminated
+                                  ? Colors.orange
+                                  : Colors.green,
                         ),
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                      DataColumn(label: Text('IP', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
-                      DataColumn(label: Text('NAS', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
-                      DataColumn(label: Text('MAC', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
-                      DataColumn(label: Text('Plan', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
-                      DataColumn(label: Text('Status', style: TextStyle(fontSize: fontSize, color: Colors.grey))),
-                    ],
-                    rows: pageItems.map((subscription) {
-                      return DataRow(
-                        onSelectChanged: (selected) {
-                          if (selected == true) {
-                            _showSubscriptionDetails(subscription);
-                          }
-                        },
-                        cells: [
-                          DataCell(Text(subscription.name, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(subscription.lastCon.ip, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(subscription.lastCon.nas, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(subscription.macAdd, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Text(subscription.plan.name, style: TextStyle(fontSize: fontSize))),
-                          DataCell(Container(
-                            width: 110,
-                            decoration: BoxDecoration(
-                              color: subscription.isDisconnected
-                                  ? Colors.red.withOpacity(0.1)
-                                  : subscription.isTerminated
-                                      ? Colors.orange.withOpacity(0.1)
-                                      : Colors.green.withOpacity(0.1),
-                              border: Border.all(
-                                color: subscription.isDisconnected
-                                    ? Colors.red
-                                    : subscription.isTerminated
-                                        ? Colors.orange
-                                        : Colors.green,
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            padding: const EdgeInsets.all(5),
-                            child: Text(
-                              subscription.isDisconnected
-                                  ? 'Disconnected'
-                                  : subscription.isTerminated
-                                      ? 'Terminated'
-                                      : 'Connected',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                color: subscription.isDisconnected
-                                    ? Colors.red
-                                    : subscription.isTerminated
-                                        ? Colors.orange
-                                        : Colors.green,
-                              ),
-                            ),
-                          )),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              if (_filteredSubscriptions.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(
-                    child: Text(
-                      'No matching results found.',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
+                      padding: const EdgeInsets.all(5),
                       child: Text(
-                        _filteredSubscriptions.isEmpty
-                          ? 'No entries'
-                          : 'Showing data ${startIndex + 1} to ${endIndex > _filteredSubscriptions.length ? _filteredSubscriptions.length : endIndex} of ${_filteredSubscriptions.length} entries',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                        subscription.isDisconnected
+                            ? 'Disconnected'
+                            : subscription.isTerminated
+                                ? 'Terminated'
+                                : 'Connected',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          color: subscription.isDisconnected
+                              ? Colors.red
+                              : subscription.isTerminated
+                                  ? Colors.orange
+                                  : Colors.green,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    CustomPagination(
-                      totalItems: _filteredSubscriptions.length,
-                      currentPage: _currentPage,
-                      onPageChange: (number) {
-                        setState(() {
-                          _currentPage = number;
-                        });
-                      },
-                      onItemsPerPageChange: _onItemsPerPageChanged,
-                      show: _rowsPerPage,
-                      fontSize: fontSize,
-                    ),
+                    )),
                   ],
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        if (_filteredSubscriptions.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.0),
+            child: Center(
+              child: Text(
+                'No matching results found.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  _filteredSubscriptions.isEmpty
+                      ? 'No entries'
+                      : 'Showing data ${_currentPage * _rowsPerPage + 1} to ${(_currentPage + 1) * _rowsPerPage > _filteredSubscriptions.length ? _filteredSubscriptions.length : (_currentPage + 1) * _rowsPerPage} of $_totalSubscriptions entries',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              CustomPagination(
+                totalItems: _totalSubscriptions,
+                currentPage: _currentPage,
+                onPageChange: (number) {
+                  _loadPage(number); // Load the new page
+                },
+                onItemsPerPageChange: _onItemsPerPageChanged,
+                show: _rowsPerPage,
+                fontSize: fontSize,
               ),
             ],
-          );
-        } else {
-          return const Center(child: Text('No data available'));
-        }
-      },
+          ),
+        ),
+      ],
     );
   }
 }
